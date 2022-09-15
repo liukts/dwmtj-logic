@@ -1,0 +1,13 @@
+for i := 0; i <= maxRegion; i++ {
+	xLoc := (i * regionWidth) - (0.5 * sizeX) + fixed_w
+	defregion(i, rect(regionWidth, sizeY).transl(xLoc + regionWidth/2, 0, 0))
+	midpoint := xLoc + regionWidth/2
+
+	if (midpoint) >= (-(offsetDistance + oxideWidth)) && (midpoint) <= (-(offsetDistance)) {
+		Ku1.setRegion(i, magAn)
+	} else if (midpoint) >= (offsetDistance) && (midpoint) <= (offsetDistance + oxideWidth) {
+		Ku1.setRegion(i, magAn)
+	} else {
+		Ku1.setRegion(i, 5e5)
+	}
+}

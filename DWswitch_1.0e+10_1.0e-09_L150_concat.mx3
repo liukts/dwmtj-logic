@@ -27,6 +27,8 @@ notch_space := notch_space_L / cos(angle)
 Nx := 320
 Ny := 15
 
+magAn := 7e5
+
 setgridsize(Nx, Ny, 1)
 setcellsize(sizeX/Nx, sizeY/Ny, sizeZ)
 if preload_geom == 1 {
@@ -87,17 +89,30 @@ fixed_w := 5e-9
 grainSize := 1e-9
 randomSeed := 0
 maxRegion := 253
+regionWidth := (sizeX - 2*fixed_w) / maxRegion
 randK := 0.0125 // 0.2 results in 15.8 degree maximum deflection, 0.23 --> 18 degrees
 varK := 0.025
-ext_makegrains(grainSize, maxRegion, randomSeed)
-for i := 0; i < maxRegion; i++ {
-	// AnisU.setRegion(i, vector(randK*2*(rand()-0.5), randK*2*(rand()-0.5), 1))
-	Ku1.setRegion(i, 5e5+((2*(rand()-0.5))*5e5*varK))
+offsetDistance := 25e-9
+oxideWidth := 15e-9
+/* This is the Block that will split up the DW into the equation */
+/* VCMA */
+for i := 0; i <= maxRegion; i++ {
+	xLoc := (i * regionWidth) - (0.5 * sizeX) + fixed_w
+	defregion(i, rect(regionWidth, sizeY).transl(xLoc + regionWidth/2, 0, 0))
+	midpoint := xLoc + regionWidth/2
+
+	if (midpoint) >= (-(offsetDistance + oxideWidth)) && (midpoint) <= (-(offsetDistance)) {
+		Ku1.setRegion(i, magAn)
+	} else if (midpoint) >= (offsetDistance) && (midpoint) <= (offsetDistance + oxideWidth) {
+		Ku1.setRegion(i, magAn)
+	} else {
+		Ku1.setRegion(i, 5e5)
+	}
 }
 defregion(254, rect(fixed_w, sizeY).transl(-((0.5*sizeX)-(0.5*fixed_w)), 0, 0))
 defregion(255, rect(fixed_w, sizeY).transl(((0.5*sizeX)-(0.5*fixed_w)), 0, 0))
 startpos := 50e-9
-m = TwoDomain(0, 0, 1, 1, 0, 0, 0, 0, -1).transl(-(0.5*sizeX)+startpos+fixed_w, 0, 0)
+m = TwoDomain(0, 0, 1, 1, 0, 0, 0, 0, -1).transl(-(0.5*sizeX) + startpos + fixed_w, 0, 0)
 m.setRegion(254, uniform(0, 0, 1))
 m.setRegion(255, uniform(0, 0, -1))
 frozenspins.setRegion(254, 254)
@@ -146,9 +161,10 @@ mx_mid := cropY(m.Comp(2), floor(Ny/2), floor(Ny/2+1))
 tableAdd(mx_mid)
 tableAddVar(I, "I_x", "A")
 tableautosave(10e-12)
+tau_RE := 0.00000
 
 dt_step := 0.05e-09
-
+/*
 j_x0 = 1.0e10
 J = vector(0, 0, j_x0)
 tau_RE := (alpha_R * (j_x0 / 2) * stt_P) / (u_B * Ms)
@@ -963,4 +979,4 @@ j_x159 = 1.0e10
 J = vector(0, 0, j_x159)
 tau_RE = (alpha_R * (j_x159 / 2) * stt_P) / (u_B * Ms)
 B_ext = vector(0, tau_RE, 0)
-run(dt_step)
+run(dt_step)*/

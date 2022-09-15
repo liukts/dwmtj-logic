@@ -6,14 +6,14 @@ import numpy as np
 gpu_num = 0
 os.environ["CUDA_VISIBLE_DEVICES"]=str(gpu_num)
 
-T1 = time.time()
+Test = 0
 
 src_dir = os.getcwd()
-root_f = "DWswitch_1.0e+10_1.0e-09_L150_concat.mx3"
+root_f = "DWswitch_concat.mx3"
 
 # os.system("./mumax3 " + root_f)
 
-J_reset = np.load("J_reset_3.0e10_TMR=200.npy")
+J_reset = np.load("./Test"+str(Test)+"/J_reset_D1.npy")
 Nsamples = J_reset.shape[1]
 
 # if gpu_num == 0:
@@ -23,8 +23,13 @@ Nsamples = J_reset.shape[1]
 #     seedlist = np.array([480729151,539132639,594026345,675324135,686123422,701027736,\
 #         701258021,709705655,944973596,962102195],dtype=int)
 
-seedlist = np.array([480729151,539132639,594026345],dtype=int)
-num_seeds = len(seedlist)
+seedlist = np.array([480729151,539132639,594026345,675324135,686123422,701027736,\
+        701258021,709705655,944973596,962102195, 3737392, 102375943, 392749, 75849383, \
+        2748383, 67363, 8474, 203938, 9833245, 82873, 182933, 27838393, 282937, 96544, \
+        73832839, 8943829, 6849373, 50938292, 2829383, 283749, 837, 883320, 5038322, \
+        6302833, 8464939, 27293, 740038, 87393222, 32, 85948, 8292, 0, 58392223, \
+        49403, 3938277, 859493, 7283, 293873, 3653332, 3839],dtype=int)
+num_seeds = 3
 
 for j in range(0,num_seeds):
     seed_j = seedlist[j]
@@ -40,15 +45,79 @@ for j in range(0,num_seeds):
     if path.isfile(newfile):
         os.remove(newfile)
 
+    sizeX = 135e-9
+    Nx = 135
+    startpos = 35e-9
+    magAn = 4.7e5
+    offsetDistance = 22.5e-9
+    oxideWidth = 15e-9 
+    fixed_w = 5e-9
+    VCMA_dur = 1/3
+    p_dur = 3e-9
+
     newdata = filedata.replace("randomSeed := 0","randomSeed := " + str(seed_j))
+    newdata = newdata.replace("sizeX := 320e-9","sizeX := " + "{:.2e}".format(sizeX))
+    newdata = newdata.replace("Nx := 320","Nx := " + str(Nx))
+    newdata = newdata.replace("startpos := 50e-9","startpos := " + "{:.2e}".format(startpos))
+    newdata = newdata.replace("magAn := 7e5","magAn := " + "{:.2e}".format(magAn)) 
+    newdata = newdata.replace("offsetDistance := 25e-9","offsetDistance := " + "{:.2e}".format(offsetDistance)) #Middle of DW to first edge of oxide contact
+    newdata = newdata.replace("oxideWidth := 15e-9","oxideWidth := " + "{:.2e}".format(oxideWidth))
+    newdata = newdata.replace("fixed_w := 5e-9","fixed_w := " + "{:.2e}".format(fixed_w)) 
+
+    GRAINflag = 0
     for i in range(Nsamples):
-        newdata = newdata.replace("j_x"+str(i)+" = 1.0e10","j_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]))
+        newdata = newdata + "\n" + "j_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]) + "\n" \
+                + "J = vector(0, 0, j_x" + str(i) + ")\n" + "tau_RE = (alpha_R * (j_x" + str(i) + " / 2) * stt_P) / (u_B * Ms)" \
+                + "\nB_ext = vector(0, tau_RE, 0)\nrun(dt_step)\n"
+
+        if i == (20 + (1 - VCMA_dur) * p_dur / 1e-9 * 20 + 1): #Statement to turn on VCMA Pinning
+            VCMA = open("VCMA.txt",'r')
+            VCMAdata = VCMA.read()
+            VCMA.close()
+            replaceString = "j_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]) + "\n" + VCMAdata + "\n"
+            newdata = newdata.replace("j_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]),replaceString)
+        elif (GRAINflag == 0) and (J_reset[j,i] != 0): #Set up graining after the first rest
+            GRAINflag = 1
+            GRAIN = open("GRAIN.txt",'r')
+            GRAINdata = GRAIN.read()
+            GRAIN.close()
+            replaceString = "j_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]) + "\n" + GRAINdata + "\n"
+            newdata = newdata.replace("j_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]),replaceString)
+
+    # for i in range(Nsamples):
+    #     newdata = newdata.replace("j_x"+str(i)+" = 1.0e10","j_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]))
+
+    #     if i == (20 + (1 - VCMA_dur) * p_dur / 1e-9 * 20 + 1): # (20 iterations is 1ns)
+    #         VCMA = open("VCMA.txt",'r')
+    #         VCMAdata = VCMA.read()
+    #         VCMA.close()
+    #         replaceString = "j_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]) + "\n" + VCMAdata + "\n"
+    #         newdata = newdata.replace("j_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]),replaceString)
+
+    #     if (GRAINflag == 0) and (J_reset[j,i] != 0):
+    #         GRAINflag = 1
+    #         GRAIN = open("GRAIN.txt",'r')
+    #         GRAINdata = GRAIN.read()
+    #         GRAIN.close()
+    #         replaceString = "j_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]) + "\n" + GRAINdata + "\n"
+    #         newdata = newdata.replace("j_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]),replaceString)
+
+    #     if (VCMAflag == 0) and (J_reset[j,i] == 0) and (i > 25):
+    #         VCMAflag = 1
+    #         VCMA = open("VCMA.txt",'r')
+    #         VCMAdata = VCMA.read()
+    #         VCMA.close()
+    #         replaceString = "j_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]) + "\n" + VCMAdata + "\n"
+    #         newdata = newdata.replace("j_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]),replaceString)
+            
     f = open(newfile,'w')
     f.write(newdata)
     f.close()
     os.system("mumax3 " + newfile)
     os.remove(newfile)
 
-
-T2 = time.time()
-print("Elapsed time: {:.4f}".format(T2-T1)+"s")
+newfolder = "Test" + str(Test) + "/"
+for j in range(0,num_seeds):
+    seed_j = seedlist[j]
+    folder = "DWconcat_" + str(seed_j) + "_2.out"
+    os.system("mv " + folder + " " + newfolder)
