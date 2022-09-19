@@ -31,6 +31,10 @@ seedlist = np.array([480729151,539132639,594026345,675324135,686123422,701027736
         49403, 3938277, 859493, 7283, 293873, 3653332, 3839],dtype=int)
 num_seeds = 3
 
+VCMA = open("VCMA.txt",'r')
+VCMAdata = VCMA.read()
+VCMA.close()    
+
 for j in range(0,num_seeds):
     seed_j = seedlist[j]
 
@@ -63,6 +67,7 @@ for j in range(0,num_seeds):
     newdata = newdata.replace("offsetDistance := 25e-9","offsetDistance := " + "{:.2e}".format(offsetDistance)) #Middle of DW to first edge of oxide contact
     newdata = newdata.replace("oxideWidth := 15e-9","oxideWidth := " + "{:.2e}".format(oxideWidth))
     newdata = newdata.replace("fixed_w := 5e-9","fixed_w := " + "{:.2e}".format(fixed_w)) 
+    newdata = newdata.replace("/* VCMA */", "\n" + VCMAdata + "\n")
 
     GRAINflag = 0
     for i in range(Nsamples):
@@ -71,9 +76,6 @@ for j in range(0,num_seeds):
                 + "\nB_ext = vector(0, tau_RE, 0)\nrun(dt_step)\n"
 
         if i == (20 + (1 - VCMA_dur) * p_dur / 1e-9 * 20 + 1): #Statement to turn on VCMA Pinning
-            VCMA = open("VCMA.txt",'r')
-            VCMAdata = VCMA.read()
-            VCMA.close()
             replaceString = "j_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]) + "\n" + VCMAdata + "\n"
             newdata = newdata.replace("j_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]),replaceString)
         elif (GRAINflag == 0) and (J_reset[j,i] != 0): #Set up graining after the first rest

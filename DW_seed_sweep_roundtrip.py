@@ -30,6 +30,10 @@ seedlist = np.array([480729151,539132639,594026345,675324135,686123422,701027736
         6302833, 8464939, 27293, 740038, 87393222, 32, 85948, 8292, 0, 58392223, \
         49403, 3938277, 859493, 7283, 293873, 3653332, 3839],dtype=int)
 
+VCMA = open("VCMA.txt",'r')
+VCMAdata = VCMA.read()
+VCMA.close()    
+
 for j in range(0,num_seeds):
     seed_j = seedlist[j]
     for i in range(0,num_steps):
@@ -69,6 +73,7 @@ for j in range(0,num_seeds):
             newdata = newdata.replace("oxideWidth := 15e-9","oxideWidth := " + "{:.2e}".format(oxideWidth)) 
             newdata = newdata.replace("fixed_w := 5e-9","fixed_w := " + "{:.2e}".format(fixed_w))
             newdata = newdata.replace("VCMA_dur := 1","VCMA_dur := " + str(VCMA_dur))
+            newdata = newdata.replace("/* VCMA */", "\n" + VCMAdata + "\n")
 
             f = open(newfile,'w')
             f.write(newdata)

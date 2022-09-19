@@ -96,19 +96,7 @@ offsetDistance := 25e-9
 oxideWidth := 15e-9
 /* This is the Block that will split up the DW into the equation */
 /* VCMA */
-for i := 0; i <= maxRegion; i++ {
-	xLoc := (i * regionWidth) - (0.5 * sizeX) + fixed_w
-	defregion(i, rect(regionWidth, sizeY).transl(xLoc + regionWidth/2, 0, 0))
-	midpoint := xLoc + regionWidth/2
 
-	if (midpoint) >= (-(offsetDistance + oxideWidth)) && (midpoint) <= (-(offsetDistance)) {
-		Ku1.setRegion(i, magAn)
-	} else if (midpoint) >= (offsetDistance) && (midpoint) <= (offsetDistance + oxideWidth) {
-		Ku1.setRegion(i, magAn)
-	} else {
-		Ku1.setRegion(i, 5e5)
-	}
-}
 defregion(254, rect(fixed_w, sizeY).transl(-((0.5*sizeX)-(0.5*fixed_w)), 0, 0))
 defregion(255, rect(fixed_w, sizeY).transl(((0.5*sizeX)-(0.5*fixed_w)), 0, 0))
 startpos := 50e-9

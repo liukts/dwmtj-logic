@@ -4,10 +4,10 @@ import time
 import numpy as np
 
 T1 = time.time()
-Test = 1 #Test number
+Test = 0 #Test number
 
 # FIRST (Parameters to modify for different runs)
-num_seeds = 3 # Number of seeds up to 50 to run for same test
+num_seeds = 1 # Number of seeds up to 50 to run for same test
 jx = 3.0e+10 # Current Density
 p_dur = 3e-9 # length of current pulse
 sizeX = 135e-9 # Size of DW

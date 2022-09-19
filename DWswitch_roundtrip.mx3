@@ -98,19 +98,6 @@ oxideWidth := 15e-9
 
 /* This is the Block that will split up the DW into the equation */
 /* VCMA */
-for i := 0; i <= maxRegion; i++ {
-	xLoc := (i * regionWidth) - (0.5 * sizeX) + fixed_w
-	defregion(i, rect(regionWidth, sizeY).transl(xLoc + regionWidth/2, 0, 0))
-	midpoint := xLoc + regionWidth/2
-
-	if (midpoint) >= (-(offsetDistance + oxideWidth)) && (midpoint) <= (-(offsetDistance)) {
-		Ku1.setRegion(i, magAn)
-	} else if (midpoint) >= (offsetDistance) && (midpoint) <= (offsetDistance + oxideWidth) {
-		Ku1.setRegion(i, magAn)
-	} else {
-		Ku1.setRegion(i, 5e5)
-	}
-}
 
 defregion(254, rect(fixed_w, sizeY).transl(-((0.5*sizeX)-(0.5*fixed_w)), 0, 0))
 defregion(255, rect(fixed_w, sizeY).transl(((0.5*sizeX)-(0.5*fixed_w)), 0, 0))
@@ -123,7 +110,7 @@ frozenspins.setRegion(255, 255)
 EdgeSmooth = 8
 
 // material params
-Ms := 800e3
+Ms := 8e5 //Magnetic Saturation
 Msat = Ms
 Aex = 1.3e-11
 al := 0.05
@@ -182,55 +169,16 @@ for i := 0; i <= maxRegion; i++ {
 }
 run(p_dur * (1 - VCMA_dur)) //Switch to higher position
 /* VCMA */
-for i := 0; i <= maxRegion; i++ {
-	xLoc := (i * regionWidth) - (0.5 * sizeX) + fixed_w
-	defregion(i, rect(regionWidth, sizeY).transl(xLoc + regionWidth/2, 0, 0))
-	midpoint := xLoc + regionWidth/2
-
-	if (midpoint) >= (-(offsetDistance + oxideWidth)) && (midpoint) <= (-(offsetDistance)) {
-		Ku1.setRegion(i, magAn)
-	} else if (midpoint) >= (offsetDistance) && (midpoint) <= (offsetDistance + oxideWidth) {
-		Ku1.setRegion(i, magAn)
-	} else {
-		Ku1.setRegion(i, 5e5)
-	}
-}
 run(p_dur * (VCMA_dur))
 
 J = vector(0, 0, 0)
 B_ext = vector(0, 0, 0)
 /* VCMA */
-for i := 0; i <= maxRegion; i++ {
-	xLoc := (i * regionWidth) - (0.5 * sizeX) + fixed_w
-	defregion(i, rect(regionWidth, sizeY).transl(xLoc + regionWidth/2, 0, 0))
-	midpoint := xLoc + regionWidth/2
-
-	if (midpoint) >= (-(offsetDistance + oxideWidth)) && (midpoint) <= (-(offsetDistance)) {
-		Ku1.setRegion(i, magAn)
-	} else if (midpoint) >= (offsetDistance) && (midpoint) <= (offsetDistance + oxideWidth) {
-		Ku1.setRegion(i, magAn)
-	} else {
-		Ku1.setRegion(i, 5e5)
-	}
-}
 run(rest) //Hold (High position) with VCMA
 
 J = vector(0, 0, -j_x)
 B_ext = vector(0, -tau_RE, 0)
 /* VCMA */
-for i := 0; i <= maxRegion; i++ {
-	xLoc := (i * regionWidth) - (0.5 * sizeX) + fixed_w
-	defregion(i, rect(regionWidth, sizeY).transl(xLoc + regionWidth/2, 0, 0))
-	midpoint := xLoc + regionWidth/2
-
-	if (midpoint) >= (-(offsetDistance + oxideWidth)) && (midpoint) <= (-(offsetDistance)) {
-		Ku1.setRegion(i, magAn)
-	} else if (midpoint) >= (offsetDistance) && (midpoint) <= (offsetDistance + oxideWidth) {
-		Ku1.setRegion(i, magAn)
-	} else {
-		Ku1.setRegion(i, 5e5)
-	}
-}
 run(p_dur * (VCMA_dur))
 /* Graining */
 ext_makegrains(grainSize, maxRegion, randomSeed) 
@@ -242,17 +190,4 @@ run(p_dur * (1 - VCMA_dur)) //Switch to lower state
 J = vector(0, 0, 0)
 B_ext = vector(0, 0, 0)
 /* VCMA */
-for i := 0; i <= maxRegion; i++ {
-	xLoc := (i * regionWidth) - (0.5 * sizeX) + fixed_w
-	defregion(i, rect(regionWidth, sizeY).transl(xLoc + regionWidth/2, 0, 0))
-	midpoint := xLoc + regionWidth/2
-
-	if (midpoint) >= (-(offsetDistance + oxideWidth)) && (midpoint) <= (-(offsetDistance)) {
-		Ku1.setRegion(i, magAn)
-	} else if (midpoint) >= (offsetDistance) && (midpoint) <= (offsetDistance + oxideWidth) {
-		Ku1.setRegion(i, magAn)
-	} else {
-		Ku1.setRegion(i, 5e5)
-	}
-}
 run(rest) //Hold with VCMA
