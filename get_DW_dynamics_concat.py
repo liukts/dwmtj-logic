@@ -42,7 +42,8 @@ for i in range(num_seeds):
     if i == 0:
         t = cur_data[:,0]
         dw_pos = np.zeros((num_seeds,len(t)))
-    dw_pos[i,:] = (cur_data[:,3] + 1) * sizeX/2 - fixed_w # translate mz vector to dw_pos
+    dw_pos[i,:] = cur_data[:,3] * (sizeX + fixed_w * 2) / 2 + sizeX / 2 # translate mz vector to dw_pos
+    # dw_pos[i,:] = (cur_data[:,3] + 1) * sizeX/2 - fixed_w # translate mz vector to dw_pos
 
 fig,(ax1,ax2) = plt.subplots(2,1,figsize=(7,11.5))
 plt.subplots_adjust(hspace=0.25)
@@ -78,11 +79,11 @@ ax2.set_ylabel('DW position (nm)',fontsize=FS,fontname="Arial")
 # ax2.set_xticks([0,1,2,3,4,5,6,7,8,9,10,11,12])
 # ax2.set_xticklabels(["0","","2","","4","","6","","8","","10","","12"],fontname="Arial")
 # ax2.set_yticks([0,65,130,195,260])
-# ax2.set_yticklabels(ax2.get_yticks().astype(int),fontname="Arial")
+ax2.set_yticks([0,sizeX/2 - offsetDistance - oxideWidth,sizeX/2 - offsetDistance,x_L,x_R,sizeX/2 + offsetDistance,sizeX/2 + offsetDistance + oxideWidth,135])
+ax2.set_yticklabels(ax2.get_yticks().astype(int),fontname="Arial")
 
 t_sample = np.arange(0,t_pulse + t_rest,0.05e-9)
 
-#TODO Add lines to pause 
 # ax1.plot([t_rest1/1e-9,t_rest1/1e-9],[0,260],'--k',linewidth=LW)
 # ax1.plot(np.array([t_rest1/1e-9,t_rest1/1e-9])+t_pulse/1e-9,[0,260],'--k',linewidth=LW)
 for i in range(num_seeds):

@@ -150,6 +150,7 @@ relax()
 mx_mid := cropY(m.Comp(2), floor(Ny/2), floor(Ny/2+1))
 tableAdd(mx_mid)
 tableAddVar(I, "I_x", "A")
+tableAdd(Ku1)
 tableautosave(10e-12)
 
 j_x := -1.0e+10

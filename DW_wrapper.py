@@ -19,7 +19,7 @@ offsetDistance = 22.5e-9 #Distance from middle of DW to edge of contact (nm)
 oxideWidth = 15e-9 # Size of Contact (nm)
 fixed_w = 5e-9 # Size of fixed ends (nm)
 MTJ_w = 15e-9 # Size of the MTJ (nm)\
-VCMA_dur = 1/3 # Ratio of pinning effect during current pulse
+VCMA_dur = 0 # Ratio of pinning effect during current pulse
 
 # SECOND (Change parameters and run DW_seed_sweep_roundtrip.py)
 root_f = "DW_seed_sweep_roundtrip.py"

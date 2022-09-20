@@ -1,8 +1,8 @@
 /* VCMA */
 for i := 0; i <= maxRegion; i++ {
 	xLoc := (i * regionWidth) - (0.5 * sizeX) + fixed_w
-	defregion(i, rect(regionWidth, sizeY).transl(xLoc + regionWidth/2, 0, 0))
 	midpoint := xLoc + regionWidth/2
+	defregion(i, rect(regionWidth, sizeY).transl(midpoint, 0, 0))
 
 	sMidpoint := midpoint / 1e-9
 	magVal := 4.88074019590981 + (-2.99219411611410e-05 * sMidpoint) + (-0.000432730246558269 * pow(sMidpoint,2)) 

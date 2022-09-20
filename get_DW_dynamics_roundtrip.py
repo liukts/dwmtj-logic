@@ -1,4 +1,5 @@
 import os
+import math
 from os import path
 import numpy as np
 import matplotlib
@@ -69,11 +70,12 @@ for i in range(num_seeds):
         if j == 0 and i == 0:
             t = cur_data[:,0]
 
-        x = (cur_data[:,3] + 1) * (sizeX/2) - fixed_w # translate mz vector to dw_pos
+        # x = (cur_data[:,3] + 1) * (sizeX/2) - fixed_w # translate mz vector to dw_pos
+        x = cur_data[:,3] * (sizeX + fixed_w * 2) / 2 + sizeX / 2
         if mode == 2 or mode == 3:
             if j == 0 and i == 0:
                 dw_pos = np.zeros((num_seeds,len(t)))
-            dw_pos[i,:] = (cur_data[:,3] + 1) * (sizeX/2) - fixed_w # translate mz vector to dw_pos
+            dw_pos[i,:] = x
         elif mode == 1:
             t1 = t_rest + t_pulse + t_rest
             t2 = t_rest + t_pulse + t_rest + t_pulse + t_rest
@@ -176,8 +178,9 @@ elif mode == 3:
     ax1.set_ylabel('DW position (nm)',fontsize=FS,fontname="Arial")
     # ax1.set_xticks([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16])
     # ax1.set_xticklabels(["0","","2","","4","","6","","8","","10","","12","","14","","16"],fontname="Arial")
-    # ax1.set_yticks([0,50,65,90,112.5,135,260])
-    # ax1.set_yticklabels(ax1.get_yticks().astype(int),fontname="Arial")
+    # ax1.set_yticks([0,50,60,90,112.5,135])
+    ax1.set_yticks([0,sizeX/2 - offsetDistance - oxideWidth,sizeX/2 - offsetDistance,x_L,x_R,sizeX/2 + offsetDistance,sizeX/2 + offsetDistance + oxideWidth,135])
+    ax1.set_yticklabels(ax1.get_yticks().astype(int),fontname="Arial")
 
     # Plot t vs current that will go through the second device
     J_resets = np.zeros(dw_pos.shape)
