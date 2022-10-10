@@ -85,32 +85,6 @@ for j in range(0,num_seeds):
             GRAIN.close()
             replaceString = "j_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]) + "\n" + GRAINdata + "\n"
             newdata = newdata.replace("j_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]),replaceString)
-
-    # for i in range(Nsamples):
-    #     newdata = newdata.replace("j_x"+str(i)+" = 1.0e10","j_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]))
-
-    #     if i == (20 + (1 - VCMA_dur) * p_dur / 1e-9 * 20 + 1): # (20 iterations is 1ns)
-    #         VCMA = open("VCMA.txt",'r')
-    #         VCMAdata = VCMA.read()
-    #         VCMA.close()
-    #         replaceString = "j_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]) + "\n" + VCMAdata + "\n"
-    #         newdata = newdata.replace("j_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]),replaceString)
-
-    #     if (GRAINflag == 0) and (J_reset[j,i] != 0):
-    #         GRAINflag = 1
-    #         GRAIN = open("GRAIN.txt",'r')
-    #         GRAINdata = GRAIN.read()
-    #         GRAIN.close()
-    #         replaceString = "j_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]) + "\n" + GRAINdata + "\n"
-    #         newdata = newdata.replace("j_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]),replaceString)
-
-    #     if (VCMAflag == 0) and (J_reset[j,i] == 0) and (i > 25):
-    #         VCMAflag = 1
-    #         VCMA = open("VCMA.txt",'r')
-    #         VCMAdata = VCMA.read()
-    #         VCMA.close()
-    #         replaceString = "j_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]) + "\n" + VCMAdata + "\n"
-    #         newdata = newdata.replace("j_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]),replaceString)
             
     f = open(newfile,'w')
     f.write(newdata)

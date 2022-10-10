@@ -185,10 +185,15 @@ elif mode == 3:
     # Plot t vs current that will go through the second device
     J_resets = np.zeros(dw_pos.shape)
     TMR = 2.0
+    r_parallel = 1000
+    r_wire = 1000
+    r_HM = 1000
+    resistor = 0
 
     # Assume that if MTJ is on, all the input current flows through it, and none to the left end of the
     # track. This is not realistic and should be replaced by a resistive divider model
-    J_high = pulse_amps[0]/1e10
+    # J_high = (pulse_amps[0]/1e10) * (r_wire / 2 + resistor) / ((r_wire / 2) + resistor + ((r_wire * r_HM) / (r_wire + r_HM)) + r_parallel)
+    J_high = (pulse_amps[0]/1e10) * (1/2)
     J_low = J_high/(1 + TMR)
 
     # Get J vs time based on DW position
@@ -197,6 +202,7 @@ elif mode == 3:
         J_i += J_low * (dw_pos[i,:] < x_L)
         J_i += (1/((1/J_high)*(dw_pos[i,:] - x_L)/Dx + (1/J_low)*(x_R - dw_pos[i,:])/Dx)) \
             * (dw_pos[i,:] <= x_R) * (dw_pos[i,:] >= x_L)
+        J_i += J_i
         J_i *= (t > (t_pulse + 2*t_rest))
         J_i *= (t < (2*t_pulse + 2*t_rest))
         J_resets[i,:] = J_i

@@ -46,6 +46,8 @@ for j in range(0,num_seeds):
         # jx = float(tempf[1])
         # jx += i*0.1e+10
         jx = 3.0e+10
+        j_sot = jx
+        j_stt = jx
         sizeX = 135e-9
         Nx = 135
         startpos = 35e-9
@@ -74,6 +76,8 @@ for j in range(0,num_seeds):
             newdata = newdata.replace("fixed_w := 5e-9","fixed_w := " + "{:.2e}".format(fixed_w))
             newdata = newdata.replace("VCMA_dur := 1","VCMA_dur := " + str(VCMA_dur))
             newdata = newdata.replace("/* VCMA */", "\n" + VCMAdata + "\n")
+            newdata = newdata.replace("j_stt := j_x", "j_stt := -" + "{:.2e}".format(j_stt), 1)
+            newdata = newdata.replace("j_sot := j_x", "j_sot := -" + "{:.2e}".format(j_sot), 1)
 
             f = open(newfile,'w')
             f.write(newdata)

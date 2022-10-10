@@ -102,7 +102,7 @@ oxideWidth := 15e-9
 defregion(254, rect(fixed_w, sizeY).transl(-((0.5*sizeX)-(0.5*fixed_w)), 0, 0))
 defregion(255, rect(fixed_w, sizeY).transl(((0.5*sizeX)-(0.5*fixed_w)), 0, 0))
 startpos := 50e-9
-m = TwoDomain(0, 0, 1, 1, 0, 0, 0, 0, -1).transl(-(0.5*sizeX)+startpos+fixed_w, 0, 0)
+m = TwoDomain(0, 0, 1,     1, 0, 0,    0, 0, -1).transl(-(0.5*sizeX)+startpos+fixed_w, 0, 0)
 m.setRegion(254, uniform(0, 0, 1))
 m.setRegion(255, uniform(0, 0, -1))
 frozenspins.setRegion(254, 254)
@@ -123,10 +123,13 @@ Dind = dmi
 // STT
 Xi = 0.05
 stt_P := 0.7
+
 // SHE
 sot_P := 0.2
 scale2hm := sot_P / stt_P
-pol = sot_P
+// pol = sot_P
+pol = stt_P
+
 // Rashba
 u_B := 9.274e-24
 alpha_R := 2e-30
@@ -135,6 +138,7 @@ alpha_R := 2e-30
 lambda = 1
 epsilonprime = 0
 fixedlayer = vector(0, -1, 0)
+// fixedlayer = vector(0, 0, -1)
 
 // current
 I_pulse := -8e-6
@@ -154,14 +158,20 @@ tableAdd(Ku1)
 tableautosave(10e-12)
 
 j_x := -1.0e+10
+j_stt := j_x
+j_sot := j_x
+
 p_dur := 1.0e-09
 repeat := 3
 rest := 3e-9
 VCMA_dur := 1
 run(rest) //Hold at lower position with VCMA
 
-J = vector(0, 0, j_x)
-tau_RE := (alpha_R * (j_x / 2) * stt_P) / (u_B * Ms)
+// J = vector(0, 0, j_x)
+J = vector(j_stt, 0, j_sot)
+// tau_RE := (alpha_R * (j_x / 2) * stt_P) / (u_B * Ms)
+tau_RE := (alpha_R * (j_stt / 2) * stt_P) / (u_B * Ms)
+
 B_ext = vector(0, tau_RE, 0)
 /* Graining */
 ext_makegrains(grainSize, maxRegion, randomSeed) 
@@ -177,7 +187,8 @@ B_ext = vector(0, 0, 0)
 /* VCMA */
 run(rest) //Hold (High position) with VCMA
 
-J = vector(0, 0, -j_x)
+// J = vector(0, 0, -j_x)
+J = vector(-j_stt, 0, -j_sot)
 B_ext = vector(0, -tau_RE, 0)
 /* VCMA */
 run(p_dur * (VCMA_dur))
