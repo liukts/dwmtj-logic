@@ -45,10 +45,9 @@ r_eff = (r_half + ((2* r_half + r_parallel) * (2* r_half + r_parallel)) / ((2* r
 jx = voltage_pulse / r_eff / (sizeY * (thick_HM + sizeZ))
 j_sot = jx * (r_wire / 2) / (r_wire / 2 + r_HM / 2)
 j_stt = jx * (r_HM / 2) / (r_wire / 2 + r_HM / 2)
-# j_sot = voltage_pulse / r_HM / (sizeY * thick_HM)
-# j_stt = voltage_pulse / r_eff / (sizeY * sizeZ)
-# j_sot = jx * (r_wire / (r_HM + r_wire))
-# j_stt = jx * (r_HM / (r_HM + r_wire))
+
+#Calculation for Energy of the voltage pulse
+energy = (voltage_pulse * voltage_pulse / r_eff) * p_dur
 
 # SECOND (Change parameters and run DW_seed_sweep_roundtrip.py)
 root_f = "DW_seed_sweep_roundtrip.py"
@@ -170,3 +169,10 @@ f.write(newdata)
 f.close()
 os.system("python3 " + newfile)
 os.remove(newfile)
+
+#Save the Energy Calculation
+EnergyFile = open("Energy.txt",'w')
+EnergyFile.write(str(energy))
+EnergyFile.close()    
+newfolder = "Test" + str(Test) + "/"
+os.system("mv Energy.txt " + newfolder)
