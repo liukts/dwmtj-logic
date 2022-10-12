@@ -36,6 +36,9 @@ VCMA = open("VCMA.txt",'r')
 VCMAdata = VCMA.read()
 VCMA.close()    
 
+r_HM = 1000
+r_wire = 1000
+
 for j in range(0,num_seeds):
     seed_j = seedlist[j]
 
@@ -73,7 +76,9 @@ for j in range(0,num_seeds):
     GRAINflag = 0
     for i in range(Nsamples):
         newdata = newdata + "\n" + "j_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]) + "\n" \
-                + "J = vector(0, 0, j_x" + str(i) + ")\n" + "tau_RE = (alpha_R * (j_x" + str(i) + " / 2) * stt_P) / (u_B * Ms)" \
+                + "j_stt"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i] * (r_HM / 2) / (r_wire / 2 + r_HM / 2)) + "\n" \
+                + "j_sot"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i] * (r_wire / 2) / (r_wire / 2 + r_HM / 2)) + "\n" \
+                + "J = vector(j_stt"+str(i)+", 0, j_sot" + str(i) + ")\n" + "tau_RE = (alpha_R * (j_stt" + str(i) + " / 2) * stt_P) / (u_B * Ms)" \
                 + "\nB_ext = vector(0, tau_RE, 0)\nrun(dt_step)\n"
 
         if i == (20 + (1 - VCMA_dur) * p_dur / 1e-9 * 20 + 1): #Statement to turn on VCMA Pinning

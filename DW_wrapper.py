@@ -29,17 +29,23 @@ fixed_w = 5e-9 # Size of fixed ends (nm)
 MTJ_w = 15e-9 # Size of the MTJ (nm)
 VCMA_dur = 0 # Ratio of pinning effect during current pulse
 
-r_parallel = 3000 # Resistance of MTJ in parallel State
 resistor = 10000 # Extra Resistor to help even out STT and SOT
 TMR = 2.0 # TMR of the MTJ
 resistivity_CoFeB = 500 # (uOhm*cm)
 resistivity_HM = 200 # B-W (uOhm * cm)
+r_parallel = 3000 # Resistance of MTJ in parallel State
+r_ap = TMR * r_parallel + r_parallel # Resistance of MTJ in antiparallel state
+
+#Assumption is that the same resistance levels for all devices
+rmtj0 = r_ap #Resistance of device 0
+rmtj1 = r_ap #Resistance of device 1
+# rmtj2 = r_ap #Resistance of device 2
 
 #Calculation for resistance for device 1
 r_wire = resistivity_CoFeB * (1e-6 * 1e-2) * sizeX / (sizeY * sizeZ)
 r_HM = resistivity_HM * (1e-6 * 1e-2) * sizeX / (sizeY * thick_HM)
 r_half = (r_wire * r_HM) / (r_wire + r_HM)
-r_eff = (r_half + ((2* r_half + r_parallel) * (2* r_half + r_parallel)) / ((2* r_half + r_parallel) + (2* r_half + r_parallel)))
+r_eff = (r_half + ((2* r_half + rmtj0) * (2* r_half + rmtj1)) / ((2* r_half + rmtj0) + (2* r_half + rmtj1)))
 
 #Calculate for current density for device 1
 jx = voltage_pulse / r_eff / (sizeY * (thick_HM + sizeZ))
@@ -99,8 +105,9 @@ newdata = newdata.replace("MTJ_w = 15", "MTJ_w = " + str(MTJ_w / 1e-9), 1)
 newdata = newdata.replace("Test = 0", "Test = " + str(Test), 1)
 newdata = newdata.replace("TMR = 2.0", "TMR = " + str(TMR), 1)
 newdata = newdata.replace("r_parallel = 1000", "r_parallel = " + str(r_parallel), 1)
+newdata = newdata.replace("rmtj = 1000", "rmtj = " + str(rmtj1), 1)
 newdata = newdata.replace("r_wire = 1000", "r_wire = " + str(r_wire), 1)
-newdata = newdata.replace("r_HM = 1000", "r_HM = " + str(r_wire), 1)
+newdata = newdata.replace("r_HM = 1000", "r_HM = " + str(r_HM), 1)
 newdata = newdata.replace("resistor = 0", "resistor = " + str(resistor), 1)
 
 
@@ -118,10 +125,6 @@ f = open(root_f, 'r')
 filedata = f.read()
 f.close()
 
-#Calculate for current density for device 2
-# j_sot = voltage_pulse / r_HM / (sizeY * thick_HM)
-# j_stt = voltage_pulse / r_eff / (sizeY * sizeZ)
-
 # Modify the roundtrip wrapper to have updated parameters
 newdata = filedata.replace("num_seeds = 3", "num_seeds = " + str(num_seeds), 1)
 newdata = newdata.replace("sizeX = 135e-9", "sizeX = " + "{:.2e}".format(sizeX), 1)
@@ -134,8 +137,8 @@ newdata = newdata.replace("oxideWidth = 15e-9", "oxideWidth = " + "{:.2e}".forma
 newdata = newdata.replace("fixed_w = 5e-9", "fixed_w = " + "{:.2e}".format(fixed_w), 1)
 newdata = newdata.replace("VCMA_dur = 1/3", "VCMA_dur = " + str(VCMA_dur), 1)
 newdata = newdata.replace("Test = 0", "Test = " + str(Test), 1)
-newdata = newdata.replace("j_sot = jx", "j_sot = j_x / " + str(r_HM) + " / " + "{:.2e}".format(sizeY * thick_HM))
-newdata = newdata.replace("j_stt = jx", "j_stt = j_x / " + str(r_wire) + " / " + "{:.2e}".format(sizeY * sizeZ))
+newdata = newdata.replace("r_wire = 1000", "r_wire = " + str(r_wire), 1)
+newdata = newdata.replace("r_HM = 1000", "r_HM = " + str(r_HM), 1)
 
 #Create a new file from the wrapper
 newfile = "Test" + str(Test) + "_concat.py" 

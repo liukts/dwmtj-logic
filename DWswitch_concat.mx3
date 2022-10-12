@@ -140,6 +140,8 @@ I := I_pulse
 fm2hm := 0.5 // fraction current through fm
 j_fm := 0.0
 j_hm := 0.0
+j_stt := 0.0
+j_sot := 0.0
 
 // relax magnetization
 relax()
