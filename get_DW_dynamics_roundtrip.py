@@ -190,6 +190,7 @@ elif mode == 3:
     r_HM = 1000
     resistor = 0
     rmtj = 1000
+    left = False
 
     # Assume that if MTJ is on, all the input current flows through it, and none to the left end of the
     # track. This is not realistic and should be replaced by a resistive divider model
@@ -200,15 +201,21 @@ elif mode == 3:
     # Get J vs time based on DW position
     for i in range(num_seeds):
         if rmtj == r_parallel:
-            J_i = J_high * (dw_pos[i,:] > x_R)
-            J_i += J_low * (dw_pos[i,:] < x_L)
-            J_i += (1/((1/J_high)*(dw_pos[i,:] - x_L)/Dx + (1/J_low)*(x_R - dw_pos[i,:])/Dx)) \
-                * (dw_pos[i,:] <= x_R) * (dw_pos[i,:] >= x_L)
+            if left:
+                J_i = J_high
+            else:
+                J_i = J_high * (dw_pos[i,:] > x_R)
+                J_i += J_low * (dw_pos[i,:] < x_L)
+                J_i += (1/((1/J_high)*(dw_pos[i,:] - x_L)/Dx + (1/J_low)*(x_R - dw_pos[i,:])/Dx)) \
+                    * (dw_pos[i,:] <= x_R) * (dw_pos[i,:] >= x_L)
         else:
-            J_i = J_low * (dw_pos[i,:] > x_R)
-            J_i += J_high * (dw_pos[i,:] < x_L)
-            J_i += (1/((1/J_low)*(dw_pos[i,:] - x_L)/Dx + (1/J_high)*(x_R - dw_pos[i,:])/Dx)) \
-                * (dw_pos[i,:] <= x_R) * (dw_pos[i,:] >= x_L)
+            if left:
+                J_i = J_low
+            else:
+                J_i = J_low * (dw_pos[i,:] > x_R)
+                J_i += J_high * (dw_pos[i,:] < x_L)
+                J_i += (1/((1/J_low)*(dw_pos[i,:] - x_L)/Dx + (1/J_high)*(x_R - dw_pos[i,:])/Dx)) \
+                    * (dw_pos[i,:] <= x_R) * (dw_pos[i,:] >= x_L)
 
         J_i += J_i
         J_i *= (t > (t_pulse + 2*t_rest))

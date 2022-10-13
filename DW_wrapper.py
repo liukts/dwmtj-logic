@@ -38,8 +38,9 @@ r_ap = TMR * r_parallel + r_parallel # Resistance of MTJ in antiparallel state
 
 #Assumption is that the same resistance levels for all devices
 rmtj0 = r_ap #Resistance of device 0
-rmtj1 = r_ap #Resistance of device 1
+rmtj1 = r_parallel #Resistance of device 1
 # rmtj2 = r_ap #Resistance of device 2
+left = True #If DW is left of device
 
 #Calculation for resistance for device 1
 r_wire = resistivity_CoFeB * (1e-6 * 1e-2) * sizeX / (sizeY * sizeZ)
@@ -77,6 +78,7 @@ newdata = newdata.replace("VCMA_dur = 1/3", "VCMA_dur = " + str(VCMA_dur), 1)
 newdata = newdata.replace("Test = 0", "Test = " + str(Test), 1)
 newdata = newdata.replace("j_stt = jx", "j_stt = " + "{:.2e}".format(j_stt), 1)
 newdata = newdata.replace("j_sot = jx", "j_sot = " + "{:.2e}".format(j_sot), 1)
+newdata = newdata.replace("left = False", "left = " + str(left), 1)
 
 #Create a new file from the wrapper
 newfile = "Test" + str(Test) + "_roundtrip.py" 
@@ -109,7 +111,7 @@ newdata = newdata.replace("rmtj = 1000", "rmtj = " + str(rmtj1), 1)
 newdata = newdata.replace("r_wire = 1000", "r_wire = " + str(r_wire), 1)
 newdata = newdata.replace("r_HM = 1000", "r_HM = " + str(r_HM), 1)
 newdata = newdata.replace("resistor = 0", "resistor = " + str(resistor), 1)
-
+newdata = newdata.replace("left = False", "left = " + str(left), 1)
 
 #Create a new file from the wrapper
 newfile = "Test" + str(Test) + "_get_roundtrip.py" 

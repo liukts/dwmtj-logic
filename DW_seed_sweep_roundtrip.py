@@ -58,11 +58,17 @@ for j in range(0,num_seeds):
         oxideWidth = 15e-9 
         fixed_w = 5e-9
         VCMA_dur = 1/3
+        left = False
 
         newfile = newfile + str(seed_j) + "_1.mx3"
         if path.isfile(newfile):
             pass
         else:
+            if left:
+                jx = jx / 2
+                j_sot = j_sot / 2
+                j_stt = j_stt / 2
+
             newdata = filedata.replace("j_x := -1.0e+10","j_x := -" + "{:.2e}".format(jx))
             newdata = newdata.replace("p_dur := 1.0e-09","p_dur := " + "{:.2e}".format(p_dur)) #Default was 4.0e-09
             newdata = newdata.replace("randomSeed := 0","randomSeed := " + str(seed_j))
@@ -78,7 +84,8 @@ for j in range(0,num_seeds):
             newdata = newdata.replace("/* VCMA */", "\n" + VCMAdata + "\n")
             newdata = newdata.replace("j_stt := j_x", "j_stt := -" + "{:.2e}".format(j_stt), 1)
             newdata = newdata.replace("j_sot := j_x", "j_sot := -" + "{:.2e}".format(j_sot), 1)
-
+            if left:
+                newdata = newdata.replace("run(p_dur * (1 - VCMA_dur))", "run(0)", 1)
             f = open(newfile,'w')
             f.write(newdata)
             f.close()
