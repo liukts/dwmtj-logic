@@ -13,8 +13,16 @@ root_f = "DWswitch_concat.mx3"
 
 # os.system("./mumax3 " + root_f)
 
-J_reset = np.load("./Test"+str(Test)+"/J_reset_D1.npy")
-Nsamples = J_reset.shape[1]
+J_LAA = np.load("./Output_Current/J_LAA.npy")
+J_LAP = np.load("./Output_Current/J_LAP.npy")
+J_LPA = np.load("./Output_Current/J_LPA.npy")
+J_LPP = np.load("./Output_Current/J_LPP.npy")
+J_RAA = np.load("./Output_Current/J_RAA.npy")
+J_RAP = np.load("./Output_Current/J_RAP.npy")
+J_RPA = np.load("./Output_Current/J_RPA.npy")
+J_RPP = np.load("./Output_Current/J_RPP.npy")
+
+Nsamples = J_LAA.shape[1]
 
 # if gpu_num == 0:
 #     seedlist = np.array([1052981872,136925168,151867838,247587902,255367361,258676125,301209998,\
@@ -29,7 +37,7 @@ seedlist = np.array([52,53,54,55,56,\
         75, 76, 77, 78, 79, 80,81, 82, 83, \
         84, 85, 86, 87, 88, 89, 90, 91, 92, 93, \
         94, 95, 96, 97, 98, 99, 100],dtype=int)
-num_seeds = 3
+num_seeds = 1
 
 
 VCMA = open("VCMA.txt",'r')
@@ -40,6 +48,7 @@ r_HM = 1000
 r_wire = 1000
 
 for j in range(0,num_seeds):
+    J_reset = J_LAA
     seed_j = seedlist[j]
 
     tempf = root_f.split("_")
@@ -55,6 +64,8 @@ for j in range(0,num_seeds):
 
     sizeX = 135e-9
     Nx = 135
+    sizeY = 15e-9 # Width of the Wire
+    Ny = 15 # Number of grids in y direction
     startpos = 35e-9
     magAn = 4.7e5
     offsetDistance = 22.5e-9
@@ -66,6 +77,8 @@ for j in range(0,num_seeds):
     newdata = filedata.replace("randomSeed := 0","randomSeed := " + str(seed_j))
     newdata = newdata.replace("sizeX := 320e-9","sizeX := " + "{:.2e}".format(sizeX))
     newdata = newdata.replace("Nx := 320","Nx := " + str(Nx))
+    newdata = newdata.replace("sizeY := 15e-9","sizeY := " + "{:.2e}".format(sizeY))
+    newdata = newdata.replace("Ny := 15","Ny := " + str(Ny))
     newdata = newdata.replace("startpos := 50e-9","startpos := " + "{:.2e}".format(startpos))
     newdata = newdata.replace("magAn := 7e5","magAn := " + "{:.2e}".format(magAn)) 
     newdata = newdata.replace("offsetDistance := 25e-9","offsetDistance := " + "{:.2e}".format(offsetDistance)) #Middle of DW to first edge of oxide contact

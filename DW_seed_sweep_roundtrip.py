@@ -32,7 +32,11 @@ seedlist = np.array([1,2,3,4,5,6,\
 
 VCMA = open("VCMA.txt",'r')
 VCMAdata = VCMA.read()
-VCMA.close()    
+VCMA.close()   
+
+GRAIN = open("GRAIN.txt",'r')
+GRAINdata = GRAIN.read()
+GRAIN.close()
 
 for j in range(0,num_seeds):
     seed_j = seedlist[j]
@@ -48,6 +52,8 @@ for j in range(0,num_seeds):
         jx = 3.0e+10
         j_sot = jx
         j_stt = jx
+        rmtj0 = 1000
+        rmtj1 = 1000
         sizeX = 135e-9
         Nx = 135
         startpos = 35e-9
@@ -59,18 +65,18 @@ for j in range(0,num_seeds):
         fixed_w = 5e-9
         VCMA_dur = 1/3
         left = False
+        dt_step = 0.05e-09
 
         newfile = newfile + str(seed_j) + "_1.mx3"
         if path.isfile(newfile):
             pass
         else:
-            if left:
-                jx = jx / 2
-                j_sot = j_sot / 2
-                j_stt = j_stt / 2
-
             newdata = filedata.replace("j_x := -1.0e+10","j_x := -" + "{:.2e}".format(jx))
-            newdata = newdata.replace("p_dur := 1.0e-09","p_dur := " + "{:.2e}".format(p_dur)) #Default was 4.0e-09
+            newdata = newdata.replace("j_stt := j_x", "j_stt := -" + "{:.2e}".format(j_stt), 1)
+            newdata = newdata.replace("j_sot := j_x", "j_sot := -" + "{:.2e}".format(j_sot), 1)
+            newdata = newdata.replace("j_sttAMTJ := j_x", "j_sttAMTJ := -" + "{:.2e}".format(j_stt * (rmtj1) / (rmtj0 + rmtj1)), 1)
+            newdata = newdata.replace("j_sotAMTJ := j_x", "j_sotAMTJ := -" + "{:.2e}".format(j_sot * (rmtj1) / (rmtj0 + rmtj1)), 1)
+            newdata = newdata.replace("p_dur := 1.0e-09","p_dur := " + "{:.2e}".format(p_dur))
             newdata = newdata.replace("randomSeed := 0","randomSeed := " + str(seed_j))
             newdata = newdata.replace("sizeX := 160e-9","sizeX := " + "{:.2e}".format(sizeX))
             newdata = newdata.replace("Nx := 160","Nx := " + str(Nx))
@@ -80,12 +86,42 @@ for j in range(0,num_seeds):
             newdata = newdata.replace("offsetDistance := 25e-9","offsetDistance := " + "{:.2e}".format(offsetDistance)) #Middle of DW to first edge of oxide contact
             newdata = newdata.replace("oxideWidth := 15e-9","oxideWidth := " + "{:.2e}".format(oxideWidth)) 
             newdata = newdata.replace("fixed_w := 5e-9","fixed_w := " + "{:.2e}".format(fixed_w))
-            newdata = newdata.replace("VCMA_dur := 1","VCMA_dur := " + str(VCMA_dur))
             newdata = newdata.replace("/* VCMA */", "\n" + VCMAdata + "\n")
-            newdata = newdata.replace("j_stt := j_x", "j_stt := -" + "{:.2e}".format(j_stt), 1)
-            newdata = newdata.replace("j_sot := j_x", "j_sot := -" + "{:.2e}".format(j_sot), 1)
-            if left:
-                newdata = newdata.replace("run(p_dur * (1 - VCMA_dur))", "run(0)", 1)
+
+            # newdata = newdata.replace("VCMA_dur := 1","VCMA_dur := " + str(VCMA_dur))
+
+            # if left: # Holds the posiiton of the DW to the starting side of the track
+                # newdata = newdata.replace("run(p_dur * (1 - VCMA_dur))", "run(0)", 1)
+
+            Nsamples = int((2*rest + 2*p_dur) / dt_step) #No need to do this for the first resting phase
+            negateFLAG = 0 #Negate Flag in order to see if the direction needs to be negated
+            VCMAFLAG = 0 #Flag to signify if VCMA is applied
+            for i in range(Nsamples):
+                if i == (0) and not left: # Add Graining to begin pulse
+                    newdata = newdata + "\n" + GRAINdata + "\n" #Add graining to the freelayer track
+                    VCMAFLAG = 0
+                elif i == (p_dur / dt_step): #Add VCMA to being second rest
+                    newdata = newdata + "\n" + VCMAdata + "\n" #Apply VCMA to the freelayer track
+                    negateFLAG = 1
+                    VCMAFLAG = 1
+                elif i == ((rest + p_dur) / dt_step): #Add Grianing to being second pulse
+                    newdata = newdata + "\n" + GRAINdata + "\n" #Add graining to the freelayer track
+                    VCMAFLAG = 0
+                elif i == ((rest + 2*p_dur) / dt_step): #Add VCMA to begin third rest
+                    newdata = newdata + "\n" + VCMAdata + "\n" #Apply VCMA to the freelayer track
+                    VCMAFLAG = 1
+
+                if VCMAFLAG:
+                    newdata = newdata + "J = vector(0, 0, 0)\nB_ext = vector(0, 0, 0)\nrun(dt_step)\n"
+                elif negateFLAG: #Move the Domain Wall to the Left
+                    newdata = newdata + "\nif (m.comp(2).average() * (sizeX + fixed_w * 2) / 2 + sizeX / 2) <= sizex/2 {"
+                    newdata = newdata + "\n\tJ = vector(-j_sttAMTJ, 0, -j_sotAMTJ)\n\tB_ext = vector(0, -tau_REAMTJ, 0)\n\trun(dt_step)\n} else {" #Moving Domain Wall Left (Left of MTJ)
+                    newdata = newdata + "\n\tJ = vector(-j_stt, 0, -j_sot)\n\tB_ext = vector(0, -tau_RE, 0)\n\trun(dt_step)\n}\n" #Moving Domain Wall Left (Right of MTJ)
+                else: #Move the Domain Wall to the Right
+                    newdata = newdata + "\nif (m.comp(2).average() * (sizeX + fixed_w * 2) / 2 + sizeX / 2) <= sizex/2 {"
+                    newdata = newdata + "\n\tJ = vector(j_sttAMTJ, 0, j_sotAMTJ)\n\tB_ext = vector(0, tau_REAMTJ, 0)\n\trun(dt_step)\n} else {" #Moving Domain Wall Right (Left of MTJ)
+                    newdata = newdata + "\n\tJ = vector(j_stt, 0, j_sot)\n\tB_ext = vector(0, tau_RE, 0)\n\trun(dt_step)\n}\n" #Moving Domain Wall Right (Right of MTJ)
+
             f = open(newfile,'w')
             f.write(newdata)
             f.close()

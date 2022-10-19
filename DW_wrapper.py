@@ -9,7 +9,7 @@ Test = 0 #Test number
 # FIRST (Parameters to modify for different runs)
 num_seeds = 1 # Number of seeds up to 50 to run for same test
 jx = 1e+10 # Current Density
-voltage_pulse = 26.0e-3 # Voltage Pulse
+voltage_pulse = 25.0e-3 # Voltage Pulse
 p_dur = 1e-9 # length of current pulse
 
 sizeX = 135e-9 # Size of DW
@@ -38,14 +38,13 @@ r_ap = TMR * r_parallel + r_parallel # Resistance of MTJ in antiparallel state
 
 #Assumption is that the same resistance levels for all devices
 rmtj0 = r_ap #Resistance of device 0
-rmtj1 = r_parallel #Resistance of device 1
-# rmtj2 = r_ap #Resistance of device 2
+rmtj1 = r_ap #Resistance of device 1
 left = True #If DW is left of device
 
 #Calculation for resistance for device 1
 r_wire = resistivity_CoFeB * (1e-6 * 1e-2) * sizeX / (sizeY * sizeZ)
 r_HM = resistivity_HM * (1e-6 * 1e-2) * sizeX / (sizeY * thick_HM)
-r_half = (r_wire * r_HM) / (r_wire + r_HM)
+r_half = (r_wire/2 * r_HM/2) / (r_wire/2 + r_HM/2)
 r_eff = (r_half + ((2* r_half + rmtj0) * (2* r_half + rmtj1)) / ((2* r_half + rmtj0) + (2* r_half + rmtj1)))
 
 #Calculate for current density for device 1
@@ -79,6 +78,8 @@ newdata = newdata.replace("Test = 0", "Test = " + str(Test), 1)
 newdata = newdata.replace("j_stt = jx", "j_stt = " + "{:.2e}".format(j_stt), 1)
 newdata = newdata.replace("j_sot = jx", "j_sot = " + "{:.2e}".format(j_sot), 1)
 newdata = newdata.replace("left = False", "left = " + str(left), 1)
+newdata = newdata.replace("rmtj1 = 1000", "rmtj1 = " + str(rmtj1), 1)
+newdata = newdata.replace("rmtj0 = 1000", "rmtj0 = " + str(rmtj0), 1)
 
 #Create a new file from the wrapper
 newfile = "Test" + str(Test) + "_roundtrip.py" 
@@ -107,7 +108,8 @@ newdata = newdata.replace("MTJ_w = 15", "MTJ_w = " + str(MTJ_w / 1e-9), 1)
 newdata = newdata.replace("Test = 0", "Test = " + str(Test), 1)
 newdata = newdata.replace("TMR = 2.0", "TMR = " + str(TMR), 1)
 newdata = newdata.replace("r_parallel = 1000", "r_parallel = " + str(r_parallel), 1)
-newdata = newdata.replace("rmtj = 1000", "rmtj = " + str(rmtj1), 1)
+newdata = newdata.replace("rmtj1 = 1000", "rmtj1 = " + str(rmtj1), 1)
+newdata = newdata.replace("rmtj0 = 1000", "rmtj0 = " + str(rmtj0), 1)
 newdata = newdata.replace("r_wire = 1000", "r_wire = " + str(r_wire), 1)
 newdata = newdata.replace("r_HM = 1000", "r_HM = " + str(r_HM), 1)
 newdata = newdata.replace("resistor = 0", "resistor = " + str(resistor), 1)

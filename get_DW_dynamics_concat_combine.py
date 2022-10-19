@@ -35,7 +35,16 @@ seedlist = np.array([52,53,54,55,56,\
         94, 95, 96, 97, 98, 99, 100],dtype=int)
 num_seeds = 3
 
-J_resets = np.load("./Test"+str(Test)+"/J_reset_D1.npy")
+J_LAA = np.load("./Output_Current/J_LAA.npy")
+J_LAP = np.load("./Output_Current/J_LAP.npy")
+J_LPA = np.load("./Output_Current/J_LPA.npy")
+J_LPP = np.load("./Output_Current/J_LPP.npy")
+J_RAA = np.load("./Output_Current/J_RAA.npy")
+J_RAP = np.load("./Output_Current/J_RAP.npy")
+J_RPA = np.load("./Output_Current/J_RPA.npy")
+J_RPP = np.load("./Output_Current/J_RPP.npy")
+
+J_resets = J_LAA
 
 for i in range(num_seeds):
     cur_data = np.loadtxt("./Test"+str(Test)+"/DWconcat_"+str(seedlist[i])+"_2.out/table.txt")
