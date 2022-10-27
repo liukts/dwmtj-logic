@@ -10,11 +10,11 @@ random_seed := 0
 // geometry
 sizeX := 320e-9
 sizeY := 15e-9
-sizeZ := 3e-9
+sizeZ := 4e-9
 hm_sizeZ := sizeZ
 fm_cross_sec := sizeY * sizeZ
 hm_cross_sec := sizeY * hm_sizeZ
-notch_diam := 8e-9
+notch_diam := 3e-9
 rough_diam := 1e-9
 notch_space_L := 50e-9
 
@@ -28,6 +28,7 @@ Nx := 320
 Ny := 15
 
 magAn := 7e5
+offsetDistance := 25e-9
 
 setgridsize(Nx, Ny, 1)
 setcellsize(sizeX/Nx, sizeY/Ny, sizeZ)
@@ -47,11 +48,21 @@ if preload_geom == 1 {
 			baserect = baserect.add(rect(rough_diam, xheight+(0.5*rough_diam*randNorm())).transl(xcenter, 0.5*rough_diam*randNorm(), 0))
 		}
 		if notch_flag == 1 {
-			notch := circle(notch_diam).repeat(25e-9, 0, 0)
-			unotch := notch.transl(0, 0.25*(w1+w2), 0).rotz(angle)
-			lnotch := notch.transl(0, -0.25*(w1+w2), 0).rotz(-angle)
-			setGeom(baserect.sub(unotch).sub(lnotch))
-			saveAs(geom, "SOTPMA_rough_notch")
+			if unotch_only == 1 {
+				notch := circle(notch_diam)
+				lunotch := notch.transl(-(offsetDistance + 7.5e-9), 0.25*(w1+w2), 0).rotz(angle)
+				runotch := notch.transl((offsetDistance + 7.5e-9), 0.25*(w1+w2), 0).rotz(angle)
+				setGeom(baserect.sub(lunotch).sub(runotch))
+				saveAs(geom, "SOTPMA_rough_notch")
+			} else {
+				notch := circle(notch_diam)
+				lunotch := notch.transl(-(offsetDistance + 7.5e-9), 0.25*(w1+w2), 0).rotz(angle)
+				llnotch := notch.transl(-(offsetDistance + 7.5e-9), -0.25*(w1+w2), 0).rotz(-angle)
+				runotch := notch.transl((offsetDistance + 7.5e-9), 0.25*(w1+w2), 0).rotz(angle)
+				rlnotch := notch.transl((offsetDistance + 7.5e-9), -0.25*(w1+w2), 0).rotz(-angle)
+				setGeom(baserect.sub(lunotch).sub(llnotch).sub(runotch).sub(rlnotch))
+				saveAs(geom, "SOTPMA_rough_notch")
+			}
 		} else {
 			setGeom(baserect)
 			saveAs(geom, "SOTPMA_rough")
@@ -63,22 +74,21 @@ if preload_geom == 1 {
 		ltilt := lhrect.transl(0, -0.25*(w1+w2), 0).rotz(-angle)
 		baserect := rect(sizeX, sizeY).sub(utilt).sub(ltilt)
 		if notch_flag == 1 {
-			notch := circle(notch_diam).repeat(notch_space, 0, 0).transl(0.5*notch_space_L, 0, 0)
 			if unotch_only == 1 {
-				unotch := notch.transl(0, 0.25*(w1+w2), 0).rotz(angle)
-				setGeom(baserect.sub(unotch))
-				saveAs(geom, "STTPMA_smooth_notch")
-			} else if unotch_only == -1 {
-				lnotch := notch.transl(0, -0.25*(w1+w2), 0).rotz(-angle)
-				setGeom(baserect.sub(lnotch))
-				saveAs(geom, "STTPMA_smooth_notch")
+				notch := circle(notch_diam)
+				lunotch := notch.transl(-(offsetDistance + 7.5e-9), 0.25*(w1+w2), 0).rotz(angle)
+				runotch := notch.transl((offsetDistance + 7.5e-9), 0.25*(w1+w2), 0).rotz(angle)
+				setGeom(baserect.sub(lunotch).sub(runotch))
+				saveAs(geom, "SOTPMA_smooth_notch")
 			} else {
-				unotch := notch.transl(0, 0.25*(w1+w2), 0).rotz(angle)
-				lnotch := notch.transl(0, -0.25*(w1+w2), 0).rotz(-angle)
-				setGeom(baserect.sub(unotch).sub(lnotch))
-				saveAs(geom, "STTPMA_smooth_notch")
+				notch := circle(notch_diam)
+				lunotch := notch.transl(-(offsetDistance + 7.5e-9), 0.25*(w1+w2), 0).rotz(angle)
+				llnotch := notch.transl(-(offsetDistance + 7.5e-9), -0.25*(w1+w2), 0).rotz(-angle)
+				runotch := notch.transl((offsetDistance + 7.5e-9), 0.25*(w1+w2), 0).rotz(angle)
+				rlnotch := notch.transl((offsetDistance + 7.5e-9), -0.25*(w1+w2), 0).rotz(-angle)
+				setGeom(baserect.sub(lunotch).sub(llnotch).sub(runotch).sub(rlnotch))
+				saveAs(geom, "SOTPMA_smooth_notch")
 			}
-
 		} else {
 			setGeom(baserect)
 			saveAs(geom, "SOTPMA_smooth")
@@ -92,7 +102,6 @@ maxRegion := 253
 regionWidth := (sizeX - 2*fixed_w) / maxRegion
 randK := 0.0125 // 0.2 results in 15.8 degree maximum deflection, 0.23 --> 18 degrees
 varK := 0.025
-offsetDistance := 25e-9
 oxideWidth := 15e-9
 /* This is the Block that will split up the DW into the equation */
 /* VCMA */
@@ -108,7 +117,7 @@ frozenspins.setRegion(255, 255)
 EdgeSmooth = 8
 
 // material params
-Ms := 800e3
+Ms := 8e5 //Magnetic Saturation
 Msat = Ms
 Aex = 1.3e-11
 al := 0.05
@@ -121,10 +130,16 @@ Dind = dmi
 // STT
 Xi = 0.05
 stt_P := 0.7
+
 // SHE
 sot_P := 0.2
 scale2hm := sot_P / stt_P
-pol = sot_P
+
+//TODO Check Polarization value
+// sph := 0.33 //Spin Hall Angle
+// pol = sph
+pol = stt_P
+
 // Rashba
 u_B := 9.274e-24
 alpha_R := 2e-30
@@ -150,9 +165,12 @@ relax()
 mx_mid := cropY(m.Comp(2), floor(Ny/2), floor(Ny/2+1))
 tableAdd(mx_mid)
 tableAddVar(I, "I_x", "A")
+tableAdd(ext_dwxpos)
 tableautosave(10e-12)
 tau_RE := 0.00000
 
 dt_step := 0.05e-09
+rest := 3e-9
+run(rest) //Hold at lower position with VCMA
 
 

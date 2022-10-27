@@ -56,6 +56,8 @@ for j in range(0,num_seeds):
         rmtj1 = 1000
         sizeX = 135e-9
         Nx = 135
+        sizeY = 15e-9
+        Ny = 15
         startpos = 35e-9
         rest = 3e-9
         p_dur = 3e-9
@@ -66,6 +68,9 @@ for j in range(0,num_seeds):
         VCMA_dur = 1/3
         left = False
         dt_step = 0.05e-09
+        notch_flag = 0
+        unotch_only = 0
+        edge_rough = 0
 
         newfile = newfile + str(seed_j) + "_1.mx3"
         if path.isfile(newfile):
@@ -80,6 +85,8 @@ for j in range(0,num_seeds):
             newdata = newdata.replace("randomSeed := 0","randomSeed := " + str(seed_j))
             newdata = newdata.replace("sizeX := 160e-9","sizeX := " + "{:.2e}".format(sizeX))
             newdata = newdata.replace("Nx := 160","Nx := " + str(Nx))
+            newdata = newdata.replace("sizeY := 15e-9","sizeY := " + "{:.2e}".format(sizeY))
+            newdata = newdata.replace("Ny := 15","Ny := " + str(Ny))
             newdata = newdata.replace("startpos := 50e-9","startpos := " + "{:.2e}".format(startpos))
             newdata = newdata.replace("rest := 3e-9","rest := " + "{:.2e}".format(rest))
             newdata = newdata.replace("magAn := 7e5","magAn := " + "{:.2e}".format(magAn)) 
@@ -87,46 +94,45 @@ for j in range(0,num_seeds):
             newdata = newdata.replace("oxideWidth := 15e-9","oxideWidth := " + "{:.2e}".format(oxideWidth)) 
             newdata = newdata.replace("fixed_w := 5e-9","fixed_w := " + "{:.2e}".format(fixed_w))
             newdata = newdata.replace("/* VCMA */", "\n" + VCMAdata + "\n")
+            newdata = newdata.replace("notch_flag := 0","notch_flag := " + str(notch_flag), 1)
+            newdata = newdata.replace("unotch_only := 0","unotch_only := " + str(unotch_only), 1)
+            newdata = newdata.replace("edge_rough := 0","edge_rough := " + str(edge_rough), 1)
 
-            # newdata = newdata.replace("VCMA_dur := 1","VCMA_dur := " + str(VCMA_dur))
-
-            # if left: # Holds the posiiton of the DW to the starting side of the track
-                # newdata = newdata.replace("run(p_dur * (1 - VCMA_dur))", "run(0)", 1)
-
-            Nsamples = int((2*rest + 2*p_dur) / dt_step) #No need to do this for the first resting phase
-            negateFLAG = 0 #Negate Flag in order to see if the direction needs to be negated
+            Nsamples = int((p_dur) / dt_step) #No need to do this for the first resting phase
+            negateFLAG = 1 #Negate Flag in order to see if the direction needs to be negated
+            CURRENTFLAG = 0 # Flag signifying current being 0
             VCMAFLAG = 0 #Flag to signify if VCMA is applied
-            for i in range(Nsamples):
-                if i == (0) and not left: # Add Graining to begin pulse
+            for k in range(Nsamples):
+                if k == ((p_dur * VCMA_dur) / dt_step): #Add Grianing to being second pulse
                     newdata = newdata + "\n" + GRAINdata + "\n" #Add graining to the freelayer track
-                    VCMAFLAG = 0
-                elif i == (p_dur / dt_step): #Add VCMA to being second rest
-                    newdata = newdata + "\n" + VCMAdata + "\n" #Apply VCMA to the freelayer track
-                    negateFLAG = 1
-                    VCMAFLAG = 1
-                elif i == ((rest + p_dur) / dt_step): #Add Grianing to being second pulse
-                    newdata = newdata + "\n" + GRAINdata + "\n" #Add graining to the freelayer track
-                    VCMAFLAG = 0
-                elif i == ((rest + 2*p_dur) / dt_step): #Add VCMA to begin third rest
-                    newdata = newdata + "\n" + VCMAdata + "\n" #Apply VCMA to the freelayer track
-                    VCMAFLAG = 1
+                    CURRENTFLAG = 0
+                # elif k == ((p_dur) / dt_step): #Add VCMA to begin third rest
+                #     newdata = newdata + "\n" + VCMAdata + "\n" #Apply VCMA to the freelayer track
+                #     CURRENTFLAG = 1
 
-                if VCMAFLAG:
+                if CURRENTFLAG:
                     newdata = newdata + "J = vector(0, 0, 0)\nB_ext = vector(0, 0, 0)\nrun(dt_step)\n"
                 elif negateFLAG: #Move the Domain Wall to the Left
                     newdata = newdata + "\nif (m.comp(2).average() * (sizeX + fixed_w * 2) / 2 + sizeX / 2) <= sizex/2 {"
-                    newdata = newdata + "\n\tJ = vector(-j_sttAMTJ, 0, -j_sotAMTJ)\n\tB_ext = vector(0, -tau_REAMTJ, 0)\n\trun(dt_step)\n} else {" #Moving Domain Wall Left (Left of MTJ)
-                    newdata = newdata + "\n\tJ = vector(-j_stt, 0, -j_sot)\n\tB_ext = vector(0, -tau_RE, 0)\n\trun(dt_step)\n}\n" #Moving Domain Wall Left (Right of MTJ)
+                    newdata = newdata + "\n\tJ = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)\n\tB_ext = vector(0, -tau_REAMTJ, 0)\n\trun(dt_step)\n} else {" #Moving Domain Wall Left (Left of MTJ)
+                    newdata = newdata + "\n\tJ = vector(-j_stt, 0, -j_sot*scale2hm)\n\tB_ext = vector(0, -tau_RE, 0)\n\trun(dt_step)\n}\n" #Moving Domain Wall Left (Right of MTJ)
                 else: #Move the Domain Wall to the Right
                     newdata = newdata + "\nif (m.comp(2).average() * (sizeX + fixed_w * 2) / 2 + sizeX / 2) <= sizex/2 {"
-                    newdata = newdata + "\n\tJ = vector(j_sttAMTJ, 0, j_sotAMTJ)\n\tB_ext = vector(0, tau_REAMTJ, 0)\n\trun(dt_step)\n} else {" #Moving Domain Wall Right (Left of MTJ)
-                    newdata = newdata + "\n\tJ = vector(j_stt, 0, j_sot)\n\tB_ext = vector(0, tau_RE, 0)\n\trun(dt_step)\n}\n" #Moving Domain Wall Right (Right of MTJ)
+                    newdata = newdata + "\n\tJ = vector(j_sttAMTJ, 0, j_sotAMTJ*scale2hm)\n\tB_ext = vector(0, tau_REAMTJ, 0)\n\trun(dt_step)\n} else {" #Moving Domain Wall Right (Left of MTJ)
+                    newdata = newdata + "\n\tJ = vector(j_stt, 0, j_sot*scale2hm)\n\tB_ext = vector(0, tau_RE, 0)\n\trun(dt_step)\n}\n" #Moving Domain Wall Right (Right of MTJ)
 
+            newdata = newdata + "\n" + VCMAdata + "\n" #Apply VCMA to the freelayer track
+            newdata = newdata + "\nrun(rest)\n"
             f = open(newfile,'w')
             f.write(newdata)
             f.close()
             os.system("mumax3 " + newfile)
             os.remove(newfile)
+
+for j in range(0, num_seeds):
+    seed_j = seedlist[j]
+    folder = "DWswitch_" + str(seed_j) + "_1.out"
+    os.system("mumax3-convert -png " + folder + "/*.ovf")
 
 newfolder = "Test" + str(Test) + "/"
 if os.path.isdir(newfolder):

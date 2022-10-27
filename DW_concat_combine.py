@@ -48,7 +48,7 @@ r_HM = 1000
 r_wire = 1000
 
 for j in range(0,num_seeds):
-    J_reset = J_LAA
+    J_reset = (J_LAA)/6
     seed_j = seedlist[j]
 
     tempf = root_f.split("_")

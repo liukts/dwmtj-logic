@@ -23,6 +23,7 @@ fixed_w = 5 # Size of fixed ends (nm)
 MTJ_w = 15 # Size of the MTJ (nm)
 offsetDistance = 22.5 #Distance from middle of DW to edge of contact (nm)
 oxideWidth = 15 # Size of Contact (nm)
+startpos = 0 #Start position (nm)
 
 # What to plot
 # mode 1: Jx vs total DW displacement, with 20 random seeds per Jx
@@ -72,6 +73,7 @@ for i in range(num_seeds):
 
         # x = (cur_data[:,3] + 1) * (sizeX/2) - fixed_w # translate mz vector to dw_pos
         x = cur_data[:,3] * (sizeX + fixed_w * 2) / 2 + sizeX / 2
+        # x = cur_data[:,6] / 1e-9
         if mode == 2 or mode == 3:
             if j == 0 and i == 0:
                 dw_pos = np.zeros((num_seeds,len(t)))
@@ -191,7 +193,6 @@ elif mode == 3:
     resistor = 0
     rmtj0 = 1000
     rmtj1 = 1000
-    left = False
 
     # Assume that if MTJ is on, all the input current flows through it, and none to the left end of the
     # track. This is not realistic and should be replaced by a resistive divider model
@@ -202,7 +203,7 @@ elif mode == 3:
     # Get J vs time based on DW position
     for i in range(num_seeds):
         if rmtj1 == r_parallel:
-            if left:
+            if startpos < sizeX/2:
                 J_i = J_high
             else:
                 J_i = J_high * (dw_pos[i,:] > x_R)
@@ -210,7 +211,7 @@ elif mode == 3:
                 J_i += (1/((1/J_high)*(dw_pos[i,:] - x_L)/Dx + (1/J_low)*(x_R - dw_pos[i,:])/Dx)) \
                     * (dw_pos[i,:] <= x_R) * (dw_pos[i,:] >= x_L)
         else:
-            if left:
+            if startpos < sizeX/2:
                 J_i = J_low
             else:
                 J_i = J_low * (dw_pos[i,:] > x_R)
@@ -219,26 +220,35 @@ elif mode == 3:
                     * (dw_pos[i,:] <= x_R) * (dw_pos[i,:] >= x_L)
 
         # J_i += J_i
-        J_i *= (t > (t_pulse + 2*t_rest))
-        J_i *= (t < (2*t_pulse + 2*t_rest))
+        # J_i *= (t > (t_pulse + 2*t_rest))
+        # J_i *= (t < (2*t_pulse + 2*t_rest))
+        J_i *= (t > (t_rest))
+        J_i *= (t < (t_pulse + t_rest))
+
         J_resets[i,:] = J_i
         ax2.plot(t/1e-9,J_i,linewidth=LW)
 
     ax2.grid(which="both",color="#E2E2E2")
     ax2.set_axisbelow(True)
     ax2.tick_params(labelsize=FS)
-    ax2.set_xlim([(t_pulse + 2 * t_rest - 1e-9) * 1e9, (2* t_pulse + 2 * t_rest + 1e-9) * 1e9])
-    ax2.set_ylim([0,4.5])
+
+    # ax2.set_xlim([(t_pulse + 2 * t_rest - 1e-9) * 1e9, (2* t_pulse + 2 * t_rest + 1e-9) * 1e9])
+    ax2.set_xlim([(t_rest - 1e-9) * 1e9, (t_pulse + t_rest + 1e-9) * 1e9])
+
+    # ax2.set_ylim([0,4.5])
+    ax2.set_ylim([0,12])
     ax2.set_xlabel('Time (ns)',fontsize=FS,fontname="Arial")
     ax2.set_ylabel(r'J$_2$ (A/m$^2$)',fontsize=FS,fontname="Arial")
     # ax2.set_xticks([8,9,10,11,12,13])
     # ax2.set_xticklabels(["8","9","10","11","12","13"],fontname="Arial")
-    ax2.set_yticks([0,0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5])
-    ax2.set_yticklabels(["0","","1","","2","","3","","4",""],fontname="Arial")
+    ax2.set_yticks([0,0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,10.5,11,11.5,12])
+    ax2.set_yticklabels(["0","","1","","2","","3","","4","","5","","6","","7","","8","","9","","10","","11","","12"],fontname="Arial")
     plt.savefig("var_waveform_reset.svg",bbox_inches="tight")
 
     # Save the current
-    t_reset0 = t[t > (t_pulse + 2 * t_rest - 1e-9)] - (t_pulse + 2 * t_rest - 1e-9)
+    # t_reset0 = t[t > (t_pulse + 2 * t_rest - 1e-9)] - (t_pulse + 2 * t_rest - 1e-9)
+    t_reset0 = t[t > (t_rest - 1e-9)] - (t_rest - 1e-9)
+
     t_reset = t_reset0[t_reset0 <= (t_pulse + t_rest)]
     t_reset[0] = 0
 
@@ -246,7 +256,8 @@ elif mode == 3:
     J_reset_sample = np.zeros((num_seeds,len(t_reset)))
     for i in range(num_seeds):
         J_reset = J_resets[i,:]
-        J_reset2 = J_reset[t > (t_pulse + 2 * t_rest - 1e-9)]
+        # J_reset2 = J_reset[t > (t_pulse + 2 * t_rest - 1e-9)]
+        J_reset2 = J_reset[t > (t_rest - 1e-9)]
         J_reset2 = J_reset2[t_reset0 <= (t_pulse + t_rest)]
         J_reset_sample[i,:] = J_reset2
     
