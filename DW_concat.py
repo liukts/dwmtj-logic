@@ -73,6 +73,7 @@ for j in range(0,num_seeds):
     notch_flag = 0
     unotch_only = 0
     edge_rough = 0
+    notch_dia = 3e-9
 
     newdata = filedata.replace("randomSeed := 0","randomSeed := " + str(seed_j))
     newdata = newdata.replace("sizeX := 320e-9","sizeX := " + "{:.2e}".format(sizeX))
@@ -89,6 +90,7 @@ for j in range(0,num_seeds):
     newdata = newdata.replace("notch_flag := 0","notch_flag := " + str(notch_flag), 1)
     newdata = newdata.replace("unotch_only := 0","unotch_only := " + str(unotch_only), 1)
     newdata = newdata.replace("edge_rough := 0","edge_rough := " + str(edge_rough), 1)
+    newdata = newdata.replace("notch_diam := 3e-9", "notch_diam := " + "{:.2e}".format(notch_dia))
     
     GRAINflag = 0
     for i in range(Nsamples):

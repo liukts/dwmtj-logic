@@ -10,7 +10,7 @@ random_seed := 0
 // geometry
 sizeX := 320e-9
 sizeY := 15e-9
-sizeZ := 4e-9
+sizeZ := 3e-9
 hm_sizeZ := sizeZ
 fm_cross_sec := sizeY * sizeZ
 hm_cross_sec := sizeY * hm_sizeZ

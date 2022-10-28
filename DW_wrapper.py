@@ -23,17 +23,20 @@ And then find the voltage at which current is -9E10
 
 Only issue that arises is that this is dependent on the whole pulse, but
 when the DW is on the right side it causes two different currents
+    To depin from the notch a small pulse of 11e10 is needed
+    voltage_pulse = 55 mV
 """
 
 sizeX = 135e-9 # Size of DW
-Nx = 2*135 # Number of grids in x direction
+Nx = 135 # Number of grids in x direction
 sizeY = 15e-9 # Width of the Wire
-Ny = 2*15 # Number of grids in y direction
+Ny = 15 # Number of grids in y direction
 sizeZ = 3e-9 # Thickness of the Wire
 Nz = 1 # Number of grinds in the z direction
 thick_HM = 3e-9 # Thickness of HM (nm)
-
-startpos = 110e-9 # Start position of the DW
+right = 110e-9 # Right side of the DW Track
+left = 10e-9 # Left side of the DW Track
+startpos = right # Start position of the DW
 rest = 3e-9 # length of settling time with no current (time before pulse 1, between pulses, and after pulse 2)
 magAn = 4.7e5 # Magnetic Anisotrophy from VCMA
 offsetDistance = 22.5e-9 #Distance from middle of DW to edge of contact (nm)
@@ -57,6 +60,7 @@ rmtj1 = r_parallel #Resistance of device 1
 notch_flag = 1
 unotch_only = 1
 edge_rough = 0
+notch_dia = 3e-9
 
 #Calculation for resistance for device 1
 r_wire = resistivity_CoFeB * (1e-6 * 1e-2) * sizeX / (sizeY * sizeZ)
@@ -101,6 +105,7 @@ newdata = newdata.replace("rmtj0 = 1000", "rmtj0 = " + str(rmtj0), 1)
 newdata = newdata.replace("notch_flag = 0", "notch_flag = " + str(notch_flag), 1)
 newdata = newdata.replace("unotch_only = 0", "unotch_only = " + str(unotch_only), 1)
 newdata = newdata.replace("edge_rough = 0", "edge_rough = " + str(edge_rough), 1)
+newdata = newdata.replace("notch_dia = 3e-9", "notch_dia = " + "{:.2e}".format(notch_dia), 1)
 
 
 #Create a new file from the wrapper
@@ -171,6 +176,7 @@ newdata = newdata.replace("r_HM = 1000", "r_HM = " + str(r_HM), 1)
 newdata = newdata.replace("notch_flag = 0", "notch_flag = " + str(notch_flag), 1)
 newdata = newdata.replace("unotch_only = 0", "unotch_only = " + str(unotch_only), 1)
 newdata = newdata.replace("edge_rough = 0", "edge_rough = " + str(edge_rough), 1)
+newdata = newdata.replace("notch_dia = 3e-9", "notch_dia = " + "{:.2e}".format(notch_dia), 1)
 
 #Create a new file from the wrapper
 newfile = "Test" + str(Test) + "_concat.py" 
@@ -198,7 +204,7 @@ newdata = newdata.replace("MTJ_w = 15", "MTJ_w = " + str(MTJ_w / 1e-9), 1)
 newdata = newdata.replace("Test = 0", "Test = " + str(Test), 1)
 
 #Create a new file from the wrapper
-newfile = "Test" + str(Test) + "_get_concat.py" 
+newfile = "Test" + str(Test) + "_get_concat.py"
 f = open(newfile, 'w')
 f.write(newdata)
 f.close()
@@ -208,6 +214,6 @@ os.remove(newfile)
 #Save the Energy Calculation
 EnergyFile = open("Energy.txt",'w')
 EnergyFile.write(str(energy))
-EnergyFile.close()    
+EnergyFile.close()
 newfolder = "Test" + str(Test) + "/"
 os.system("mv Energy.txt " + newfolder)
