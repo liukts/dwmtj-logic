@@ -190,14 +190,17 @@ elif mode == 3:
     r_parallel = 1000
     r_wire = 1000
     r_HM = 1000
-    resistor = 0
+    r_half = 0
+    resistor0 = 0 # Extra Resistor added to device 0 between clk pin and ground
+    resistor1 = 0 # Extra Resistor added to device 1 between clk pin and ground
+    resistor2 = 0 # Extra Resistor added to device 2 between clk pin and ground
     rmtj0 = 1000
     rmtj1 = 1000
 
     # Assume that if MTJ is on, all the input current flows through it, and none to the left end of the
     # track. This is not realistic and should be replaced by a resistive divider model
     # J_high = (pulse_amps[0]/1e10) * (r_wire / 2 + resistor) / ((r_wire / 2) + resistor + ((r_wire * r_HM) / (r_wire + r_HM)) + r_parallel)
-    J_high = (pulse_amps[0]/1e10) * (rmtj0) / (rmtj0 + rmtj1)
+    J_high = (pulse_amps[0]/1e10) * (2*r_half + rmtj0 + resistor0) / (4*r_half + rmtj0 + rmtj1 + resistor0 + resistor2)
     J_low = J_high/(1 + TMR)
 
     # Get J vs time based on DW position
@@ -236,13 +239,13 @@ elif mode == 3:
     ax2.set_xlim([(t_rest - 1e-9) * 1e9, (t_pulse + t_rest + 1e-9) * 1e9])
 
     # ax2.set_ylim([0,4.5])
-    ax2.set_ylim([0,12])
+    ax2.set_ylim([0,15])
     ax2.set_xlabel('Time (ns)',fontsize=FS,fontname="Arial")
     ax2.set_ylabel(r'J$_2$ (A/m$^2$)',fontsize=FS,fontname="Arial")
     # ax2.set_xticks([8,9,10,11,12,13])
     # ax2.set_xticklabels(["8","9","10","11","12","13"],fontname="Arial")
-    ax2.set_yticks([0,0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,10.5,11,11.5,12])
-    ax2.set_yticklabels(["0","","1","","2","","3","","4","","5","","6","","7","","8","","9","","10","","11","","12"],fontname="Arial")
+    ax2.set_yticks([0,0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,10.5,11,11.5,12,12.5,13,13.5,14,14.5,15])
+    ax2.set_yticklabels(["0","","1","","2","","3","","4","","5","","6","","7","","8","","9","","10","","11","","12","","13","","14","","15"],fontname="Arial")
     plt.savefig("var_waveform_reset.svg",bbox_inches="tight")
 
     # Save the current
@@ -275,10 +278,10 @@ elif mode == 3:
     # J_val = jx
     # np.save("J_reset_{:.2f}".format(J_val)+"e10_TMR="+str(int(TMR*100))+".npy",J_sample)
     # np.save("J_reset_3.0e10_TMR="+str(int(TMR*100))+".npy",J_sample)
-    np.save("J_reset_D1.npy", J_sample)
+    np.save("J_reset_D1_Test" + str(Test) + ".npy", J_sample)
 
 plt.show()
 
 newfolder = "Test" + str(Test) + "/"
-os.system("mv J_reset_D1.npy " + newfolder)
+os.system("mv J_reset_D1_Test" + str(Test) + ".npy " + newfolder)
 os.system("mv var_waveform_reset.svg " + newfolder)

@@ -1,0 +1,5 @@
+/* VCMA */
+ext_makegrains(grainSize, maxRegion, randomSeed) 
+for i := 0; i <= maxRegion; i++ {
+	Ku1.setRegion(i, 5e5+((2*(rand()-0.5))*5e5*varK))
+}

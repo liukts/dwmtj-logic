@@ -1,0 +1,16 @@
+/* VCMA */
+for i := 0; i <= maxRegion; i++ {
+	xLoc := (i * regionWidth) - (0.5 * sizeX) + fixed_w
+	midpoint := xLoc + regionWidth/2
+	defregion(i, rect(regionWidth, sizeY).transl(midpoint, 0, 0))
+
+	sMidpoint := midpoint / 1e-9
+	magVal := 485146.857086827 + (-4.33338268765851 * sMidpoint) + (-41.8650604728297 * pow(sMidpoint,2)) 
+	magVal = magVal + (0.0101134112263444 * pow(sMidpoint,3)) + (0.0411442660606470 * pow(sMidpoint,4))
+	magVal = magVal + (-7.62472008608414e-06 * pow(sMidpoint,5)) + (-1.78377234443183e-05 * pow(sMidpoint,6)) 
+	magVal = magVal + (2.80833844839730e-09 * pow(sMidpoint,7)) + (4.35115804368843e-09 * pow(sMidpoint,8))
+	magVal = magVal + (-5.14724885031291e-13 * pow(sMidpoint,9)) + (-5.78857784497468e-13 * pow(sMidpoint,10))
+	magVal = magVal + (3.69386188013645e-17 * pow(sMidpoint,11)) + (3.25552141470298e-17 * pow(sMidpoint,12))
+
+	Ku1.setRegion(i, magVal)
+}

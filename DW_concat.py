@@ -7,13 +7,25 @@ gpu_num = 0
 os.environ["CUDA_VISIBLE_DEVICES"]=str(gpu_num)
 
 Test = 0
+Test1 = 0
+Test2 = 0
+simulate_deivce = 0 # 1 or 0 depending on if there is a folder of J_Reset_TMRxxx
+TMR = 2.0
+VCMA_val = 5.00 # minimum PMA value
+multiple_input = False
 
 src_dir = os.getcwd()
 root_f = "DWswitch_concat.mx3"
 
 # os.system("./mumax3 " + root_f)
+if simulate_deivce != 2:
+    J_reset = np.load("./Test"+str(Test)+"/J_reset_D1_Test" + str(Test) + ".npy")
+else:
+    J_reset = np.load("./J_reset_TMR" + str(int(TMR * 100)) +"/J_reset_D1_Test" + str(Test) + ".npy")
+    if multiple_input:
+        J_reset = np.load("./J_reset_TMR" + str(int(TMR * 100)) +"/J_reset_D1_Test" + str(Test1) + ".npy")
+        J_reset = J_reset + np.load("./J_reset_TMR" + str(int(TMR * 100)) +"/J_reset_D1_Test" + str(Test2) + ".npy")
 
-J_reset = np.load("./Test"+str(Test)+"/J_reset_D1.npy")
 Nsamples = J_reset.shape[1]
 
 # if gpu_num == 0:
@@ -32,7 +44,8 @@ seedlist = np.array([52,53,54,55,56,\
 num_seeds = 3
 
 
-VCMA = open("VCMA.txt",'r')
+# VCMA = open("VCMA.txt",'r')
+VCMA = open("VCMA_" + "{:.2e}".format(VCMA_val) + ".txt",'r')
 VCMAdata = VCMA.read()
 VCMA.close()
 
@@ -114,12 +127,16 @@ for j in range(0,num_seeds):
     os.system("mumax3 " + newfile)
     os.remove(newfile)
 
+newfolder = "Test" + str(Test) + "/"
+if not os.path.isdir(newfolder):
+    os.system("mkdir " + newfolder)
+
 for j in range(0, num_seeds):
     seed_j = seedlist[j]
     folder = "DWconcat_" + str(seed_j) + "_2.out"
     os.system("mumax3-convert -png " + folder + "/*.ovf")
 
-newfolder = "Test" + str(Test) + "/"
+# newfolder = "Test" + str(Test) + "/"
 for j in range(0,num_seeds):
     seed_j = seedlist[j]
     folder = "DWconcat_" + str(seed_j) + "_2.out"

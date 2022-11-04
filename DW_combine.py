@@ -6,27 +6,13 @@ import numpy as np
 T1 = time.time()
 Test = 0 #Test number
 Test1 = 0
+Test2 = 0
 
 # FIRST (Parameters to modify for different runs)
 num_seeds = 1 # Number of seeds up to 50 to run for same test
 jx = 1e+10 # Current Density
 voltage_pulse = 55.0e-3 # Voltage Pulse
 p_dur = 1e-9 # length of current pulse
-
-"""
-Voltage pulse of 45 mV when MTJ orientation AA obtain current pulse of -8.91e10
-    Find minimum current to cause dw movement to be -8.91E10
-
-Therefore, all that is needed to find is voltage pulse when MTJ orientation is PP
-And then find the voltage at which current is -9E10
-    The voltage pulse that allows for current of -9E10 to second device is 
-    voltage_pulse = 45 mV
-
-Only issue that arises is that this is dependent on the whole pulse, but
-when the DW is on the right side it causes two different currents
-    To depin from the notch a small pulse of 11e10 is needed
-    voltage_pulse = 55 mV
-"""
 
 sizeX = 135e-9 # Size of DW
 Nx = 135 # Number of grids in x direction
@@ -88,91 +74,12 @@ r_eff = (r_half/(2*fo1 - 1) + resistor1 + ((2* r_half/(2*fo0 - 1) + rmtj0 + resi
 # jx = voltage_pulse / r_eff / (sizeY * (thick_HM + sizeZ))
 # j_sot = jx * (r_wire / 2) / (r_wire / 2 + r_HM / 2)
 # j_stt = jx * (r_HM / 2) / (r_wire / 2 + r_HM / 2)
-jx = voltage_pulse / r_eff / (sizeY * (thick_HM + sizeZ) * (2 * fo1 - 1))
-j_sot = jx * (r_wire) / (r_wire + r_HM)
-j_stt = jx * (r_HM) / (r_wire + r_HM)
+jx = voltage_pulse / r_eff / (sizeY * (thick_HM + sizeZ) * (2*fo1 - 1))
+j_sot = jx * (r_wire / (2)) / (r_wire / (2) + r_HM / (2))
+j_stt = jx * (r_HM / (2)) / (r_wire / (2) + r_HM / (2))
 
 #Calculation for Energy of the voltage pulse
 energy = (voltage_pulse * voltage_pulse / r_eff) * p_dur
-
-# SECOND (Change parameters and run DW_seed_sweep_roundtrip.py)
-root_f = "DW_seed_sweep_roundtrip.py"
-f = open(root_f, 'r')
-filedata = f.read()
-f.close()
-
-# Modify the roundtrip wrapper to have updated parameters
-newdata = filedata.replace("num_seeds = 3", "num_seeds = " + str(num_seeds), 1)
-newdata = newdata.replace("jx = 3.0e+10", "jx = " + "{:.2e}".format(jx), 1)
-newdata = newdata.replace("sizeX = 135e-9", "sizeX = " + "{:.2e}".format(sizeX), 1)
-newdata = newdata.replace("Nx = 135", "Nx = " + str(Nx), 1)
-newdata = newdata.replace("sizeY = 15e-9", "sizeY = " + "{:.2e}".format(sizeY * (2*fo1 - 1)), 1)
-newdata = newdata.replace("Ny = 15", "Ny = " + str(Ny * (2*fo1 - 1)), 1)
-newdata = newdata.replace("startpos = 35e-9", "startpos = " + "{:.2e}".format(startpos), 1)
-newdata = newdata.replace("rest = 3e-9", "rest = " + "{:.2e}".format(rest), 1)
-newdata = newdata.replace("p_dur = 3e-9", "p_dur = " + "{:.2e}".format(p_dur), 1)
-newdata = newdata.replace("magAn = 4.7e5", "magAn = " + "{:.2e}".format(magAn), 1)
-newdata = newdata.replace("offsetDistance = 22.5e-9", "offsetDistance = " + "{:.2e}".format(offsetDistance), 1)
-newdata = newdata.replace("oxideWidth = 15e-9", "oxideWidth = " + "{:.2e}".format(oxideWidth), 1)
-newdata = newdata.replace("fixed_w = 5e-9", "fixed_w = " + "{:.2e}".format(fixed_w), 1)
-newdata = newdata.replace("VCMA_dur = 1/3", "VCMA_dur = " + str(VCMA_dur), 1)
-newdata = newdata.replace("Test = 0", "Test = " + str(Test), 1)
-newdata = newdata.replace("j_stt = jx", "j_stt = " + "{:.2e}".format(j_stt), 1)
-newdata = newdata.replace("j_sot = jx", "j_sot = " + "{:.2e}".format(j_sot), 1)
-newdata = newdata.replace("rmtj1 = 1000", "rmtj1 = " + str(rmtj1), 1)
-newdata = newdata.replace("rmtj0 = 1000", "rmtj0 = " + str(rmtj0), 1)
-newdata = newdata.replace("notch_flag = 0", "notch_flag = " + str(notch_flag), 1)
-newdata = newdata.replace("unotch_only = 0", "unotch_only = " + str(unotch_only), 1)
-newdata = newdata.replace("edge_rough = 0", "edge_rough = " + str(edge_rough), 1)
-newdata = newdata.replace("notch_dia = 3e-9", "notch_dia = " + "{:.2e}".format((2*fo1 - 1) * notch_dia * 1e-9), 1)
-newdata = newdata.replace("VCMA_val = 5.00", "VCMA_val = " + "{:.2e}".format(VCMA), 1)
-
-#Create a new file from the wrapper
-newfile = "Test" + str(Test) + "_roundtrip.py" 
-f = open(newfile, 'w')
-f.write(newdata)
-f.close()
-if simulate_deivce != 2:
-    os.system("python3 " + newfile)
-os.remove(newfile)
-
-# THIRD (Change parameters and run get_DW_dynamics_roundtrip.py)
-root_f = "get_DW_dynamics_roundtrip.py"
-f = open(root_f, 'r')
-filedata = f.read()
-f.close()
-
-# Modify the roundtrip wrapper to have updated parameters
-newdata = filedata.replace("num_seeds = 3", "num_seeds = " + str(num_seeds), 1)
-newdata = newdata.replace("jx = 3.0e+10", "jx = " + "{:.2e}".format(jx), 1) #TODO Need to modify this value
-newdata = newdata.replace("sizeX = 135", "sizeX = " + str(sizeX / 1e-9), 1)
-newdata = newdata.replace("t_rest = 3e-9", "t_rest = " + "{:.2e}".format(rest), 1)
-newdata = newdata.replace("t_pulse = 3e-9", "t_pulse = " + "{:.2e}".format(p_dur), 1)
-newdata = newdata.replace("offsetDistance = 22.5", "offsetDistance = " + str(offsetDistance / 1e-9), 1)
-newdata = newdata.replace("oxideWidth = 15", "oxideWidth = " + str(oxideWidth / 1e-9), 1)
-newdata = newdata.replace("fixed_w = 5", "fixed_w = " + str(fixed_w / 1e-9), 1)
-newdata = newdata.replace("MTJ_w = 15", "MTJ_w = " + str(MTJ_w / 1e-9), 1)
-newdata = newdata.replace("Test = 0", "Test = " + str(Test), 1)
-newdata = newdata.replace("TMR = 2.0", "TMR = " + str(TMR), 1)
-newdata = newdata.replace("r_parallel = 1000", "r_parallel = " + str(r_parallel), 1)
-newdata = newdata.replace("rmtj1 = 1000", "rmtj1 = " + str(rmtj1), 1)
-newdata = newdata.replace("rmtj0 = 1000", "rmtj0 = " + str(rmtj0), 1)
-newdata = newdata.replace("r_wire = 1000", "r_wire = " + str(r_wire), 1)
-newdata = newdata.replace("r_HM = 1000", "r_HM = " + str(r_HM), 1)
-newdata = newdata.replace("startpos = 0", "startpos = " + str(startpos / 1e-9), 1)
-newdata = newdata.replace("resistor0 = 0", "resistor0 = " + str(resistor0), 1)
-newdata = newdata.replace("resistor1 = 0", "resistor1 = " + str(resistor1), 1)
-newdata = newdata.replace("resistor2 = 0", "resistor2 = " + str(resistor2), 1)
-newdata = newdata.replace("r_half = 0", "r_half = " + str(r_half), 1)
-
-#Create a new file from the wrapper
-newfile = "Test" + str(Test) + "_get_roundtrip.py" 
-f = open(newfile, 'w')
-f.write(newdata)
-f.close()
-if simulate_deivce != 2:
-    os.system("python3 " + newfile)
-os.remove(newfile)
 
 # FOURTH (Change parameters and run DW_concat.py)
 root_f = "DW_concat.py"
@@ -186,7 +93,6 @@ newdata = newdata.replace("sizeX = 135e-9", "sizeX = " + "{:.2e}".format(sizeX),
 newdata = newdata.replace("Nx = 135", "Nx = " + str(Nx), 1)
 newdata = newdata.replace("sizeY = 15e-9", "sizeY = " + "{:.2e}".format(sizeY * (2*fo2 - 1)), 1)
 newdata = newdata.replace("Ny = 15", "Ny = " + str(Ny * (2*fo2 - 1)), 1)
-# newdata = newdata.replace("startpos = 35e-9", "startpos = " + "{:.2e}".format(startpos), 1)
 newdata = newdata.replace("rest = 3e-9", "rest = " + "{:.2e}".format(rest), 1)
 newdata = newdata.replace("p_dur = 3e-9", "p_dur = " + "{:.2e}".format(p_dur), 1)
 newdata = newdata.replace("magAn = 4.7e5", "magAn = " + "{:.2e}".format(magAn), 1)
@@ -200,11 +106,12 @@ newdata = newdata.replace("r_HM = 1000", "r_HM = " + str(r_HM), 1)
 newdata = newdata.replace("notch_flag = 0", "notch_flag = " + str(notch_flag), 1)
 newdata = newdata.replace("unotch_only = 0", "unotch_only = " + str(unotch_only), 1)
 newdata = newdata.replace("edge_rough = 0", "edge_rough = " + str(edge_rough), 1)
-newdata = newdata.replace("notch_dia = 3e-9", "notch_dia = " + "{:.2e}".format((2*fo1 - 1) * notch_dia * 1e-9), 1)
+newdata = newdata.replace("notch_dia = 3e-9", "notch_dia = " + "{:.2e}".format((2*fo2 - 1) * notch_dia * 1e-9), 1)
 newdata = newdata.replace("simulate_deivce = 0", "simulate_deivce = " + str(simulate_deivce), 1)
 newdata = newdata.replace("TMR = 2.0", "TMR = " + str(TMR), 1)
-newdata = newdata.replace("multiple_input = False", "multiple_input = " + str(multiple_input), 1)
 newdata = newdata.replace("Test1 = 0", "Test1 = " + str(Test1), 1)
+newdata = newdata.replace("Test2 = 0", "Test2 = " + str(Test2), 1)
+newdata = newdata.replace("multiple_input = False", "multiple_input = " + str(multiple_input), 1)
 newdata = newdata.replace("VCMA_val = 5.00", "VCMA_val = " + "{:.2e}".format(VCMA), 1)
 
 #Create a new file from the wrapper
@@ -232,9 +139,10 @@ newdata = newdata.replace("oxideWidth = 15", "oxideWidth = " + str(oxideWidth / 
 newdata = newdata.replace("fixed_w = 5", "fixed_w = " + str(fixed_w / 1e-9), 1)
 newdata = newdata.replace("MTJ_w = 15", "MTJ_w = " + str(MTJ_w / 1e-9), 1)
 newdata = newdata.replace("Test = 0", "Test = " + str(Test), 1)
-newdata = newdata.replace("Test1 = 0", "Test1 = " + str(Test1), 1)
 newdata = newdata.replace("TMR = 2.0", "TMR = " + str(TMR), 1)
 newdata = newdata.replace("simulate_deivce = 0", "simulate_deivce = " + str(simulate_deivce), 1)
+newdata = newdata.replace("Test1 = 0", "Test1 = " + str(Test1), 1)
+newdata = newdata.replace("Test2 = 0", "Test2 = " + str(Test2), 1)
 newdata = newdata.replace("multiple_input = False", "multiple_input = " + str(multiple_input), 1)
 
 #Create a new file from the wrapper

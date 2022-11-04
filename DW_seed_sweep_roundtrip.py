@@ -8,6 +8,7 @@ gpu_num = 1
 # os.environ["CUDA_VISIBLE_DEVICES"]=str(gpu_num)
 
 Test = 0
+VCMA_val = 5.00 # minimum PMA value
 
 src_dir = os.getcwd()
 root_f = "DWswitch_roundtrip.mx3"
@@ -30,7 +31,7 @@ seedlist = np.array([1,2,3,4,5,6,\
         34, 35, 36, 37, 38, 39, 40, 41, 42, 43, \
         44, 45, 46, 47, 48, 49, 50],dtype=int)
 
-VCMA = open("VCMA.txt",'r')
+VCMA = open("VCMA_" + "{:.2e}".format(VCMA_val) + ".txt",'r')
 VCMAdata = VCMA.read()
 VCMA.close()   
 

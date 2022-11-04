@@ -10,6 +10,8 @@ font = font_manager.FontProperties(family='Arial',style='normal',size=FS)
 matplotlib.rcParams['axes.linewidth'] = 4
 
 Test = 0
+Test1 = 0
+Test2 = 0
 
 # CHECKME Fixme
 t_pulse = 3e-9 # length of current pulse
@@ -33,8 +35,17 @@ seedlist = np.array([52,53,54,55,56,\
         84, 85, 86, 87, 88, 89, 90, 91, 92, 93, \
         94, 95, 96, 97, 98, 99, 100],dtype=int)
 num_seeds = 3
+simulate_deivce = 0 # 1 or 0 depending on if there is a folder of J_Reset_TMRxxx
+TMR = 2.0
+multiple_input = False
 
-J_resets = np.load("./Test"+str(Test)+"/J_reset_D1.npy")
+if simulate_deivce != 2:
+    J_resets = np.load("./Test"+str(Test)+"/J_reset_D1_Test" + str(Test) + ".npy")
+else:
+    J_resets = np.load("./J_reset_TMR" + str(int(TMR * 100)) +"/J_reset_D1_Test" + str(Test) + ".npy")
+    if multiple_input:
+        J_resets = np.load("./J_reset_TMR" + str(int(TMR * 100)) +"/J_reset_D1_Test" + str(Test1) + ".npy")
+        J_resets = J_resets + np.load("./J_reset_TMR" + str(int(TMR * 100)) +"/J_reset_D1_Test" + str(Test2) + ".npy")
 
 for i in range(num_seeds):
     cur_data = np.loadtxt("./Test"+str(Test)+"/DWconcat_"+str(seedlist[i])+"_2.out/table.txt")
@@ -100,7 +111,7 @@ ax1.tick_params(labelsize=FS)
 ax1.set_xlim([0,t_pulse/1e-9 + 2])
 # ax1.set_xlim([0,max(t/1e-9)])
 # ax1.set_ylim([0,4.5])
-ax1.set_ylim([0,12])
+ax1.set_ylim([0,15])
 ax1.set_xlabel('Time (ns)',fontsize=FS,fontname="Arial")
 ax1.set_ylabel(r'J$_2$ (A/m$^2$)',fontsize=FS,fontname="Arial")
 ax1.set_xticks([0,1,2,3])
@@ -109,13 +120,28 @@ ax1.set_xticklabels(["2","3","4","5"],fontname="Arial")
 # ax1.set_yticks([0,0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10])
 # ax1.set_yticklabels(["0","","1","","2","","3","","4",""],fontname="Arial")
 # ax1.set_yticklabels(["0","","1","","2","","3","","4","","5","","6","","7","","8","","9","","10"],fontname="Arial")
-ax1.set_yticks([0,0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,10.5,11,11.5,12])
-ax1.set_yticklabels(["0","","1","","2","","3","","4","","5","","6","","7","","8","","9","","10","","11","","12"],fontname="Arial")
+ax1.set_yticks([0,0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,10.5,11,11.5,12,12.5,13,13.5,14,14.5,15])
+ax1.set_yticklabels(["0","","1","","2","","3","","4","","5","","6","","7","","8","","9","","10","","11","","12","","13","","14","","15"],fontname="Arial")
 # plt.savefig("var_waveform_reset.svg",bbox_inches="tight")
 
 
 plt.savefig("var_waveform_dw2.svg",bbox_inches="tight")
 plt.show()
 
+#Create the number of tests failed vs success
+left_counter = 0
+right_counter = 0
+for i in range(num_seeds):
+    if dw_pos[i,len(t) - 1] < sizeX/2:
+        left_counter = left_counter + 1
+    else:
+        right_counter = right_counter + 1
+
+#Save the Energy Calculation
+positionfile = open("Position.txt",'w')
+positionfile.write("Number of DW that stayed in original position: " + str(left_counter) + "\nNumber of DW that propogated to other side of track: " + str(right_counter))
+positionfile.close()
+
 newfolder = "Test" + str(Test) + "/"
 os.system("mv var_waveform_dw2.svg " + newfolder)
+os.system("mv Position.txt " + newfolder)
