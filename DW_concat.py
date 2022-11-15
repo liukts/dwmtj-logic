@@ -107,16 +107,16 @@ for j in range(0,num_seeds):
     
     GRAINflag = 0
     for i in range(Nsamples):
-        newdata = newdata + "\n" + "j_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]) + "\n"
+        newdata = newdata + "\nj_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]) + "\n"
         newdata = newdata + "j_stt"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i] * (r_HM / 2) / (r_wire / 2 + r_HM / 2)) + "\n"
         newdata = newdata + "j_sot"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i] * (r_wire / 2) / (r_wire / 2 + r_HM / 2)) + "\n"
         newdata = newdata + "J = vector(j_stt"+str(i)+", 0, j_sot" + str(i) + "*scale2hm)\n" + "tau_RE = (alpha_R * (j_sot" + str(i) + ") * stt_P) / (u_B * Ms)"
         newdata = newdata + "\nB_ext = vector(0, tau_RE, 0)\nrun(dt_step)\n"
 
-        if i == ((p_dur + 1e-9) / dt_step): #Statement to turn on VCMA Pinning
+        if i == (int((p_dur + 1e-9) / dt_step + 1)): #Statement to turn on VCMA Pinning
             replaceString = "j_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]) + "\n" + VCMAdata + "\n"
             newdata = newdata.replace("j_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]),replaceString)
-        elif i == (1e-9 / dt_step): #Turn on graining
+        elif i == (int(1e-9 / dt_step + 1)): #Turn on graining
             replaceString = "j_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]) + "\n" + GRAINdata + "\n"
             newdata = newdata.replace("j_x"+str(i)+" := -" + "{:.5e}".format(1e10*J_reset[j,i]),replaceString)
             

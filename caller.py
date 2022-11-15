@@ -8,46 +8,56 @@ import shutil
 T1 = time.time()
 
 # Size Parameters
-sizeX = 135e-9 # Size of DW
-Nx = 135 # Number of grids in x direction
+# sizeX = 135e-9 # Size of DW
+# Nx = 135 # Number of grids in x direction
+sizeX = 255e-9 # Size of DW
+Nx = 255 # Number of grids in x direction
 sizeY = 15e-9 # Width of the Wire
 Ny = 15 # Number of grids in y direction
 sizeZ = 3e-9 # Thickness of the Wire
 Nz = 1 # Number of grinds in the z direction
-thick_HM = 3e-9 # Thickness of HM (nm)
-
-# Position Parameters
-offsetDistance = 22.5e-9 #Distance from middle of DW to edge of contact (nm)
+# thick_HM = 3e-9 # Thickness of HM (nm)
+thick_HM = 7e-9 # Thickness of HM (nm)
 oxideWidth = 15e-9 # Size of Contact (nm)
-MTJ_w = 15e-9 # Size of the MTJ (nm)
-right = 110e-9 # Right side of the DW Track
-left = 10e-9 # Left side of the DW Track
 
 # Resistance Parameters
 resistivity_CoFeB = 500 # (uOhm*cm)
 resistivity_HM = 40 # Pt (uOhm * cm)
 
 #Notches and Edge Roughness Parameters
-notch_flag = 1
-unotch_only = 1
-edge_rough = 0
+notch_flag = 0
+unotch_only = 0
+edge_rough = 1
 notch_dia = 3
 
-#Fanout of the Devices
+#Fanout of the Devices (1/2, 1, 2, 3, 4)
 fo0 = 1 #Fanout of device 0
-fo1 = 1 #Fanout of device 1
+fo1 = 1/2 #Fanout of device 1
 fo2 = 1 #Fanout of device 2
+
+# Calculation of the width of the MTJ
+MTJ_w1 = 15e-9
+MTJ_w2 = 15e-9
+if fo1 != 1/2:
+    MTJ_w1 = MTJ_w1 * (3**fo1)
+if fo2 != 1/2:
+    MTJ_w2 = MTJ_w2 * (3**fo2)
+
+offsetDistance = (9 * 15e-9)/2 + 15e-9 #Distance from middle of DW to edge of contact (nm)
+left = sizeX/2 - offsetDistance # Left side of the DW Track
+right = sizeX/2 + offsetDistance # Right side of the DW Track
 
 # (CHECKME) Parameters that will be changed
 Test = 0 #Test number
 num_seeds = 1 # Number of seeds up to 50 to run for same test
 rest = 3e-9 # length of settling time with no current (time before pulse 1, between pulses, and after pulse 2)
-voltage_pulse = 55.0e-3 # Voltage Pulse (55 mV required for single fo)
+voltage_pulse = 40.0e-3 # Voltage Pulse
 VCMA_dur = 0 # Ratio of pinning effect during current pulse (Ratio needs to be less than 1 to work correctly)
 VCMA = 4.70 # minimum PMA value
 TMR = 0.90 # TMR of the MTJ
+p_dur = 2e-9 # Duration of the voltage pulse
 simulate_deivce = 0 # (Basically what device to simulate) 1 device 1 2 device 2
-multiple_input = False # If the device is going to be used as multiple input
+multiple_input = False # If t he device is going to be used as multiple input
 
 # Replacing all the data
 if not multiple_input:
@@ -68,7 +78,6 @@ newdata = newdata.replace("Nz = 1", "Nz = " + str(Nz), 1)
 newdata = newdata.replace("thick_HM = 3e-9", "thick_HM = " + "{:.2e}".format(thick_HM), 1)
 newdata = newdata.replace("offsetDistance = 22.5e-9", "offsetDistance = " + "{:.2e}".format(offsetDistance), 1)
 newdata = newdata.replace("oxideWidth = 15e-9", "oxideWidth = " + "{:.2e}".format(oxideWidth), 1)
-newdata = newdata.replace("MTJ_w = 15e-9", "MTJ_w = " + "{:.2e}".format(MTJ_w), 1)
 newdata = newdata.replace("right = 110e-9", "right = " + "{:.2e}".format(right), 1)
 newdata = newdata.replace("left = 10e-9", "left = " + "{:.2e}".format(left), 1)
 newdata = newdata.replace("resistivity_CoFeB = 500", "resistivity_CoFeB = " + str(resistivity_CoFeB), 1)
@@ -88,6 +97,9 @@ newdata = newdata.replace("fo2 = 1", "fo2 = " + str(fo2), 1)
 newdata = newdata.replace("simulate_deivce = 0", "simulate_deivce = " + str(simulate_deivce), 1)
 newdata = newdata.replace("multiple_input = False", "multiple_input = " + str(multiple_input), 1)
 newdata = newdata.replace("VCMA = 5.00", "VCMA = " + "{:.2e}".format(VCMA), 1)
+newdata = newdata.replace("p_dur = 2e-9", "p_dur = " + "{:.2e}".format(p_dur), 1)
+newdata = newdata.replace("MTJ_w1 = 15e-9", "MTJ_w1 = " + "{:.2e}".format(MTJ_w1), 1)
+newdata = newdata.replace("MTJ_w2 = 15e-9", "MTJ_w2 = " + "{:.2e}".format(MTJ_w2), 1)
 
 # Create new folder for all tests to run in
 newfolder = "Test" + str(Test) + "/"

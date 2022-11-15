@@ -1,6 +1,14 @@
 # dwmtj-logic
 Domain wall-magnetic tunnel junction logic simulations.
 
+Running the simulations:
+Run the wrapper caller.py in order to simulation all 8 orientiations of the MTJ. To change parameters, edit any parameters in caller.py.
+
+In order to simulation multiple devices:
+1. Change the simulated device to 1/2 (obtaining current)/(obtaining the concatenation)
+2. If wanting to simulate a NAND/AND then modify the parameter multiple_input
+
+----------------
 Patrick's message on how to run them:
 
 I’ve attached the relevant scripts in this archive along with their corresponding slides from last summer. They will need to be run in a particular sequence:

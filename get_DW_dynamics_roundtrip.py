@@ -196,11 +196,17 @@ elif mode == 3:
     resistor2 = 0 # Extra Resistor added to device 2 between clk pin and ground
     rmtj0 = 1000
     rmtj1 = 1000
+    fo1 = 1
 
     # Assume that if MTJ is on, all the input current flows through it, and none to the left end of the
     # track. This is not realistic and should be replaced by a resistive divider model
     # J_high = (pulse_amps[0]/1e10) * (r_wire / 2 + resistor) / ((r_wire / 2) + resistor + ((r_wire * r_HM) / (r_wire + r_HM)) + r_parallel)
-    J_high = (pulse_amps[0]/1e10) * (2*r_half + rmtj0 + resistor0) / (4*r_half + rmtj0 + rmtj1 + resistor0 + resistor2)
+    # J_high = (pulse_amps[0]/1e10) * (2*r_half + rmtj0 + resistor0) / (4*r_half + rmtj0 + rmtj1 + resistor0 + resistor2)
+    r0 = (2 * r_half + rmtj0) # Effective resistance of device 0
+    r1 = (2 * r_half + rmtj1) # Effective resistance of device 0
+    if fo1 > 1:
+        r1 = (rmtj1 + 2*r_half/fo1)
+    J_high = (pulse_amps[0]/1e10) * (r0) / (r0 + r1)
     J_low = J_high/(1 + TMR)
 
     # Get J vs time based on DW position
@@ -240,12 +246,13 @@ elif mode == 3:
 
     # ax2.set_ylim([0,4.5])
     ax2.set_ylim([0,15])
+    # ax2.set_ylim([0,25])
     ax2.set_xlabel('Time (ns)',fontsize=FS,fontname="Arial")
     ax2.set_ylabel(r'J$_2$ (A/m$^2$)',fontsize=FS,fontname="Arial")
     # ax2.set_xticks([8,9,10,11,12,13])
     # ax2.set_xticklabels(["8","9","10","11","12","13"],fontname="Arial")
-    ax2.set_yticks([0,0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,10.5,11,11.5,12,12.5,13,13.5,14,14.5,15])
-    ax2.set_yticklabels(["0","","1","","2","","3","","4","","5","","6","","7","","8","","9","","10","","11","","12","","13","","14","","15"],fontname="Arial")
+    # ax2.set_yticks([0,0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,10.5,11,11.5,12,12.5,13,13.5,14,14.5,15])
+    # ax2.set_yticklabels(["0","","1","","2","","3","","4","","5","","6","","7","","8","","9","","10","","11","","12","","13","","14","","15"],fontname="Arial")
     plt.savefig("var_waveform_reset.svg",bbox_inches="tight")
 
     # Save the current

@@ -5,12 +5,13 @@ for i := 0; i <= maxRegion; i++ {
 	defregion(i, rect(regionWidth, sizeY).transl(midpoint, 0, 0))
 
 	sMidpoint := midpoint / 1e-9
-	magVal := 489974.128533608 + (-2.92503331416311 * sMidpoint) + (-28.2589158191586 * pow(sMidpoint,2)) 
-	magVal = magVal + (0.00682655257775178 * pow(sMidpoint,3)) + (0.0277723795909331 * pow(sMidpoint,4))
-	magVal = magVal + (-5.14668605806514e-06 * pow(sMidpoint,5)) + (-1.20404633249115e-05 * pow(sMidpoint,6)) 
-	magVal = magVal + (1.89562845264548e-09 * pow(sMidpoint,7)) + (2.93703167948836e-09 * pow(sMidpoint,8))
-	magVal = magVal + (-3.47439297390677e-13 * pow(sMidpoint,9)) + (-3.90729004535549e-13 * pow(sMidpoint,10))
-	magVal = magVal + (2.49335676904427e-17 * pow(sMidpoint,11)) + (2.19747695492291e-17 * pow(sMidpoint,12))
+	magVal := 499936.904339285 + (3.29756959156285 * sMidpoint) + (-2.29213694838742 * pow(sMidpoint,2)) 
+	magVal = magVal + (-0.00187838520471375 * pow(sMidpoint,3)) + (0.000704809400082015 * pow(sMidpoint,4))
+	magVal = magVal + (2.80743567796179e-07 * pow(sMidpoint,5)) + (-4.30573342611163e-07 * pow(sMidpoint,6)) 
+	magVal = magVal + (-7.75939431285991e-12 * pow(sMidpoint,7)) + (7.91736242413909e-11 * pow(sMidpoint,8))
+	magVal = magVal + (-1.11709975558442e-15 * pow(sMidpoint,9)) + (-6.18049210463434e-15 * pow(sMidpoint,10))
+	magVal = magVal + (8.18554564532155e-20 * pow(sMidpoint,11)) + (2.20227210499298e-19 * pow(sMidpoint,12))
+	magVal = magVal + (-1.54778491823143e-24 * pow(sMidpoint,13)) + (-2.94183489994715e-24 * pow(sMidpoint,14))
 
 	Ku1.setRegion(i, magVal)
 }

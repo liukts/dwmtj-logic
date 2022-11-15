@@ -5,9 +5,9 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
-FS = 30
+FS = 25
 LW = 3.5
-sizeX = 135
+sizeX = 255
 offsetDistance = 22.5
 oxideWidth = 15
 fixed_w = 5
@@ -21,14 +21,15 @@ sMidpoint = np.linspace(-math.floor(sizeX/2), math.floor(sizeX/2), sizeX)
 magVal = np.zeros(sizeX)
 
 for x in range(len(sMidpoint)):
-    magVal[x] = 4.88074019590981 + (-2.99219411611410e-05 * x) + (-0.000432730246558269 * pow(sMidpoint[x],2)) 
-    magVal[x] = magVal[x] + (6.89289264204922e-08 * pow(sMidpoint[x],3)) + (2.72096040781391e-07 * pow(sMidpoint[x],4))
-    magVal[x] = magVal[x] + (-4.84756604766916e-11 * pow(sMidpoint[x],5)) + (2.27421161847804e-11 * pow(sMidpoint[x],6)) 
-    magVal[x] = magVal[x] + (1.48725794080439e-14 * pow(sMidpoint[x],7)) + (-5.07091377189594e-14 * pow(sMidpoint[x],8))
-    magVal[x] = magVal[x] + (-2.15271398114348e-18 * pow(sMidpoint[x],9)) + (1.29466529825287e-17 * pow(sMidpoint[x],10))
-    magVal[x] = magVal[x] + (1.20738451272334e-22 * pow(sMidpoint[x],11)) + (-1.03762546194828e-21 * pow(sMidpoint[x],12))
-    # magVal[x] = magVal[x] * 1e5
+    magVal[x] = 499906.524947088 + (4.88528828379472 * x) + (-3.39575844205535 * pow(sMidpoint[x],2)) 
+    magVal[x] = magVal[x] + (-0.00278279289587037 * pow(sMidpoint[x],3)) + (0.00104416207419544 * pow(sMidpoint[x],4))
+    magVal[x] = magVal[x] + (4.15916396734823e-07 * pow(sMidpoint[x],5)) + (-6.37886433497943e-07 * pow(sMidpoint[x],6)) 
+    magVal[x] = magVal[x] + (-1.14953989820526e-11 * pow(sMidpoint[x],7)) + (1.17294258135377e-10 * pow(sMidpoint[x],8))
+    magVal[x] = magVal[x] + (-1.65496260085558e-15 * pow(sMidpoint[x],9)) + (-9.15628459945655e-15 * pow(sMidpoint[x],10))
+    magVal[x] = magVal[x] + (1.21267342892931e-19 * pow(sMidpoint[x],11)) + (3.26262534072950e-19 * pow(sMidpoint[x],12))
+    magVal[x] = magVal[x] + (-2.29301469365942e-24 * pow(sMidpoint[x],13)) + (-4.35827392584609e-24 * pow(sMidpoint[x],14))
 
+magVal = magVal / 1e3
 sMidpoint = np.linspace(0, sizeX, sizeX)
 
 #Plot the Heatmap and the colorbar
@@ -48,16 +49,16 @@ im = ax.imshow(magVal[np.newaxis,:],
 ax.set_yticks([])
 ax.set_xlim(extent[0], extent[1])
 ax.tick_params(labelsize=FS)
-ax.set_xticks([0, 30, 45, 60, 75, 90, 105, 135])
+ax.set_xticks([0, 30, 45, 210, 225, 255])
 ax.set_xlabel('Free Layer Location (nm)',fontsize=FS,fontname="Arial",labelpad=10)
 ax.set_title('Perpendicual Magnetic Anistropy during VCMA',fontsize=FS,fontname="Arial")
 
 #Plot for the Colorbar
-# cb = fig.colorbar(im, shrink=0.85, location='bottom', orientation = "horizontal")
-cb = fig.colorbar(im, shrink=1, location='right', ticks=[4.75, 4.85, 4.95])
-cb.ax.set_ylabel('Magnetic Anistropy (J/$m^3$)',fontsize=FS,fontname="Arial",labelpad=10)
+ticks = np.linspace(magVal.min(), magVal.max(), 3, endpoint=True)
+cb = fig.colorbar(im, shrink=1, location='right', ticks=ticks, format='%2.0f')
+cb.ax.set_ylabel('Magnetic Anistropy (kJ/$m^3$)',fontsize=FS,fontname="Arial",labelpad=10)
 cb.ax.tick_params(labelsize=FS)
-# cb.ax.tick([4.7, 4.8, 4.9, 5])
+cb.ax.set_yticklabels(["470", "485", "500"])
 
 plt.tight_layout()
 plt.show()
