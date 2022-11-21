@@ -1,0 +1,895 @@
+//mumax 3.10 [linux_amd64 go1.14(gc) CUDA-11.0]
+//GPU info: Quadro RTX 4000(7973MB), CUDA Driver 11.4, cc=7.5, using cc=75 PTX
+//(c) Arne Vansteenkiste, Dynamat LAB, Ghent University, Belgium
+//This is free software without any warranty. See license.txt
+//********************************************************************//
+//  If you use mumax in any work or publication,                      //
+//  we kindly ask you to cite the references in references.bib        //
+//********************************************************************//
+//output directory: DWconcat_52_2.out/
+notch_flag := 0
+unotch_only := 0
+edge_rough := 1
+preload_geom := 0
+SnapshotFormat = "png"
+Temp = 0
+ThermSeed(0)
+random_seed := 0
+sizeX := 2.55e-07
+sizeY := 1.50e-08
+sizeZ := 3e-9
+hm_sizeZ := sizeZ
+fm_cross_sec := sizeY * sizeZ
+hm_cross_sec := sizeY * hm_sizeZ
+notch_diam := 3.00e-09
+rough_diam := 1e-9
+notch_space_L := 50e-9
+w1 := sizeY
+w2 := sizeY
+angle := Asin(0.5 * (w2 - w1) / sizeX)
+notch_space := notch_space_L / cos(angle)
+Nx := 255
+Ny := 15
+magAn := 4.70e+05
+offsetDistance := 8.25e-08
+setgridsize(Nx, Ny, 1)
+setcellsize(sizeX/Nx, sizeY/Ny, sizeZ)
+if preload_geom == 1 {
+	setGeom(imageShape("STTPMA_rough.png"))
+} else {
+	if edge_rough == 1 {
+		maxrect := sizeX / rough_diam
+		xcenter := -0.5 * (sizeX - rough_diam)
+		xheight := (xcenter+(0.5*sizeX))*((w2-w1)/sizeX) + w1
+		baserect := rect(rough_diam, w1+(0.5*rough_diam*randNorm())).transl(xcenter, 0.5*rough_diam*randNorm(), 0)
+		for i := 1; i < maxrect; i++ {
+			randSeed(random_seed)
+			random_seed += 1
+			xcenter = xcenter + rough_diam
+			xheight = (xcenter+(0.5*sizeX))*((w2-w1)/sizeX) + w1
+			if mod(i, 5) == 0 {
+				baserect = baserect.add(rect(rough_diam, xheight+(0.5*rough_diam*randNorm())).transl(xcenter, 0.5*rough_diam*randNorm(), 0))
+			} else {
+				baserect = baserect.add(rect(rough_diam, xheight+(0.5*rough_diam)).transl(xcenter, 0.5*rough_diam, 0))
+			}
+		}
+		if notch_flag == 1 {
+			if unotch_only == 1 {
+				notch := circle(notch_diam)
+				lunotch := notch.transl(-(offsetDistance + 7.5e-9), 0.25*(w1+w2), 0).rotz(angle)
+				runotch := notch.transl((offsetDistance + 7.5e-9), 0.25*(w1+w2), 0).rotz(angle)
+				setGeom(baserect.sub(lunotch).sub(runotch))
+				saveAs(geom, "SOTPMA_rough_notch")
+			} else {
+				notch := circle(notch_diam)
+				lunotch := notch.transl(-(offsetDistance + 7.5e-9), 0.25*(w1+w2), 0).rotz(angle)
+				llnotch := notch.transl(-(offsetDistance + 7.5e-9), -0.25*(w1+w2), 0).rotz(-angle)
+				runotch := notch.transl((offsetDistance + 7.5e-9), 0.25*(w1+w2), 0).rotz(angle)
+				rlnotch := notch.transl((offsetDistance + 7.5e-9), -0.25*(w1+w2), 0).rotz(-angle)
+				setGeom(baserect.sub(lunotch).sub(llnotch).sub(runotch).sub(rlnotch))
+				saveAs(geom, "SOTPMA_rough_notch")
+			}
+		} else {
+			setGeom(baserect)
+			saveAs(geom, "SOTPMA_rough")
+		}
+	} else {
+		uhrect := rect(2*sizeX, sizeY).sub(rect(2*sizeX, 0.5*sizeY).transl(0, -0.25*sizeY, 0))
+		utilt := uhrect.transl(0, 0.25*(w1+w2), 0).rotz(angle)
+		lhrect := rect(2*sizeX, sizeY).sub(rect(2*sizeX, 0.5*sizeY).transl(0, 0.25*sizeY, 0))
+		ltilt := lhrect.transl(0, -0.25*(w1+w2), 0).rotz(-angle)
+		baserect := rect(sizeX, sizeY).sub(utilt).sub(ltilt)
+		if notch_flag == 1 {
+			if unotch_only == 1 {
+				notch := circle(notch_diam)
+				lunotch := notch.transl(-(offsetDistance + 7.5e-9), 0.25*(w1+w2), 0).rotz(angle)
+				runotch := notch.transl((offsetDistance + 7.5e-9), 0.25*(w1+w2), 0).rotz(angle)
+				setGeom(baserect.sub(lunotch).sub(runotch))
+				saveAs(geom, "SOTPMA_smooth_notch")
+			} else {
+				notch := circle(notch_diam)
+				lunotch := notch.transl(-(offsetDistance + 7.5e-9), 0.25*(w1+w2), 0).rotz(angle)
+				llnotch := notch.transl(-(offsetDistance + 7.5e-9), -0.25*(w1+w2), 0).rotz(-angle)
+				runotch := notch.transl((offsetDistance + 7.5e-9), 0.25*(w1+w2), 0).rotz(angle)
+				rlnotch := notch.transl((offsetDistance + 7.5e-9), -0.25*(w1+w2), 0).rotz(-angle)
+				setGeom(baserect.sub(lunotch).sub(llnotch).sub(runotch).sub(rlnotch))
+				saveAs(geom, "SOTPMA_smooth_notch")
+			}
+		} else {
+			setGeom(baserect)
+			saveAs(geom, "SOTPMA_smooth")
+		}
+	}
+}
+fixed_w := 5.00e-09
+grainSize := 1e-9
+randomSeed := 52
+maxRegion := 253
+regionWidth := (sizeX - 2*fixed_w) / maxRegion
+randK := 0.0125
+varK := 0.025
+oxideWidth := 1.50e-08
+for i := 0; i <= maxRegion; i++ {
+	xLoc := (i * regionWidth) - (0.5 * sizeX) + fixed_w
+	midpoint := xLoc + regionWidth/2
+	defregion(i, rect(regionWidth, sizeY).transl(midpoint, 0, 0))
+	sMidpoint := midpoint / 1e-9
+	magVal := 499953.262473544 + (2.44264414189883 * sMidpoint) + (-1.69787922102728 * pow(sMidpoint, 2))
+	magVal = magVal + (-0.00139139644793811 * pow(sMidpoint, 3)) + (0.000522081037097506 * pow(sMidpoint, 4))
+	magVal = magVal + (2.07958198368938e-07 * pow(sMidpoint, 5)) + (-3.18943216748932e-07 * pow(sMidpoint, 6))
+	magVal = magVal + (-5.74769949136171e-12 * pow(sMidpoint, 7)) + (5.86471290676856e-11 * pow(sMidpoint, 8))
+	magVal = magVal + (-8.27481300391583e-16 * pow(sMidpoint, 9)) + (-4.57814229972819e-15 * pow(sMidpoint, 10))
+	magVal = magVal + (6.06336714445760e-20 * pow(sMidpoint, 11)) + (1.63131267036475e-19 * pow(sMidpoint, 12))
+	magVal = magVal + (-1.14650734679175e-24 * pow(sMidpoint, 13)) + (-2.17913696292306e-24 * pow(sMidpoint, 14))
+	Ku1.setRegion(i, magVal)
+}
+defregion(254, rect(fixed_w, sizeY).transl(-((0.5*sizeX)-(0.5*fixed_w)), 0, 0))
+defregion(255, rect(fixed_w, sizeY).transl(((0.5*sizeX)-(0.5*fixed_w)), 0, 0))
+startpos := 3.50e-08
+m = TwoDomain(0, 0, 1, 1, 0, 0, 0, 0, -1).transl(-(0.5*sizeX)+startpos+fixed_w, 0, 0)
+m.setRegion(254, uniform(0, 0, 1))
+m.setRegion(255, uniform(0, 0, -1))
+frozenspins.setRegion(254, 254)
+frozenspins.setRegion(255, 255)
+EdgeSmooth = 8
+Ms := 8e5
+Msat = Ms
+Aex = 1.3e-11
+al := 0.05
+alpha = al
+AnisU = vector(0, 0, 1)
+dmi := -0.5e-3
+Dind = dmi
+Xi = 0.05
+stt_P := 0.7
+sot_P := 0.2
+scale2hm := sot_P / stt_P
+pol = stt_P
+u_B := 9.274e-24
+alpha_R := 2e-30
+lambda = 1
+epsilonprime = 0
+fixedlayer = vector(0, -1, 0)
+I_pulse := -8e-6
+I := I_pulse
+fm2hm := 0.5
+j_fm := 0.0
+j_hm := 0.0
+j_stt := 0.0
+j_sot := 0.0
+relax()
+mx_mid := cropY(m.Comp(2), floor(Ny/2), floor(Ny/2+1))
+tableAdd(mx_mid)
+tableAddVar(I, "I_x", "A")
+tableAdd(ext_dwxpos)
+tableautosave(10e-12)
+tau_RE := 0.00000
+dt_step := 0.05e-09
+rest := 2.00e-09
+run(rest)
+j_x0 := -0.00000e+00
+j_stt0 := -0.00000e+00
+j_sot0 := -0.00000e+00
+J = vector(j_stt0, 0, j_sot0*scale2hm)
+tau_RE = (alpha_R * (j_sot0) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x1 := -0.00000e+00
+j_stt1 := -0.00000e+00
+j_sot1 := -0.00000e+00
+J = vector(j_stt1, 0, j_sot1*scale2hm)
+tau_RE = (alpha_R * (j_sot1) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x2 := -0.00000e+00
+j_stt2 := -0.00000e+00
+j_sot2 := -0.00000e+00
+J = vector(j_stt2, 0, j_sot2*scale2hm)
+tau_RE = (alpha_R * (j_sot2) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x3 := -0.00000e+00
+j_stt3 := -0.00000e+00
+j_sot3 := -0.00000e+00
+J = vector(j_stt3, 0, j_sot3*scale2hm)
+tau_RE = (alpha_R * (j_sot3) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x4 := -0.00000e+00
+j_stt4 := -0.00000e+00
+j_sot4 := -0.00000e+00
+J = vector(j_stt4, 0, j_sot4*scale2hm)
+tau_RE = (alpha_R * (j_sot4) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x5 := -0.00000e+00
+j_stt5 := -0.00000e+00
+j_sot5 := -0.00000e+00
+J = vector(j_stt5, 0, j_sot5*scale2hm)
+tau_RE = (alpha_R * (j_sot5) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x6 := -0.00000e+00
+j_stt6 := -0.00000e+00
+j_sot6 := -0.00000e+00
+J = vector(j_stt6, 0, j_sot6*scale2hm)
+tau_RE = (alpha_R * (j_sot6) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x7 := -0.00000e+00
+j_stt7 := -0.00000e+00
+j_sot7 := -0.00000e+00
+J = vector(j_stt7, 0, j_sot7*scale2hm)
+tau_RE = (alpha_R * (j_sot7) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x8 := -0.00000e+00
+j_stt8 := -0.00000e+00
+j_sot8 := -0.00000e+00
+J = vector(j_stt8, 0, j_sot8*scale2hm)
+tau_RE = (alpha_R * (j_sot8) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x9 := -0.00000e+00
+j_stt9 := -0.00000e+00
+j_sot9 := -0.00000e+00
+J = vector(j_stt9, 0, j_sot9*scale2hm)
+tau_RE = (alpha_R * (j_sot9) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x10 := -0.00000e+00
+j_stt10 := -0.00000e+00
+j_sot10 := -0.00000e+00
+J = vector(j_stt10, 0, j_sot10*scale2hm)
+tau_RE = (alpha_R * (j_sot10) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x11 := -0.00000e+00
+j_stt11 := -0.00000e+00
+j_sot11 := -0.00000e+00
+J = vector(j_stt11, 0, j_sot11*scale2hm)
+tau_RE = (alpha_R * (j_sot11) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x12 := -0.00000e+00
+j_stt12 := -0.00000e+00
+j_sot12 := -0.00000e+00
+J = vector(j_stt12, 0, j_sot12*scale2hm)
+tau_RE = (alpha_R * (j_sot12) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x13 := -0.00000e+00
+j_stt13 := -0.00000e+00
+j_sot13 := -0.00000e+00
+J = vector(j_stt13, 0, j_sot13*scale2hm)
+tau_RE = (alpha_R * (j_sot13) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x14 := -0.00000e+00
+j_stt14 := -0.00000e+00
+j_sot14 := -0.00000e+00
+J = vector(j_stt14, 0, j_sot14*scale2hm)
+tau_RE = (alpha_R * (j_sot14) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x15 := -0.00000e+00
+j_stt15 := -0.00000e+00
+j_sot15 := -0.00000e+00
+J = vector(j_stt15, 0, j_sot15*scale2hm)
+tau_RE = (alpha_R * (j_sot15) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x16 := -0.00000e+00
+j_stt16 := -0.00000e+00
+j_sot16 := -0.00000e+00
+J = vector(j_stt16, 0, j_sot16*scale2hm)
+tau_RE = (alpha_R * (j_sot16) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x17 := -0.00000e+00
+j_stt17 := -0.00000e+00
+j_sot17 := -0.00000e+00
+J = vector(j_stt17, 0, j_sot17*scale2hm)
+tau_RE = (alpha_R * (j_sot17) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x18 := -0.00000e+00
+j_stt18 := -0.00000e+00
+j_sot18 := -0.00000e+00
+J = vector(j_stt18, 0, j_sot18*scale2hm)
+tau_RE = (alpha_R * (j_sot18) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x19 := -0.00000e+00
+j_stt19 := -0.00000e+00
+j_sot19 := -0.00000e+00
+J = vector(j_stt19, 0, j_sot19*scale2hm)
+tau_RE = (alpha_R * (j_sot19) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x20 := -0.00000e+00
+j_stt20 := -0.00000e+00
+j_sot20 := -0.00000e+00
+J = vector(j_stt20, 0, j_sot20*scale2hm)
+tau_RE = (alpha_R * (j_sot20) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x21 := -9.25000e+10
+ext_makegrains(grainSize, maxRegion, randomSeed)
+for i := 0; i <= maxRegion; i++ {
+	Ku1.setRegion(i, 5e5+((2*(rand()-0.5))*5e5*varK))
+}
+j_stt21 := -3.06630e+09
+j_sot21 := -8.94337e+10
+J = vector(j_stt21, 0, j_sot21*scale2hm)
+tau_RE = (alpha_R * (j_sot21) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x22 := -9.25000e+10
+j_stt22 := -3.06630e+09
+j_sot22 := -8.94337e+10
+J = vector(j_stt22, 0, j_sot22*scale2hm)
+tau_RE = (alpha_R * (j_sot22) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x23 := -9.25000e+10
+j_stt23 := -3.06630e+09
+j_sot23 := -8.94337e+10
+J = vector(j_stt23, 0, j_sot23*scale2hm)
+tau_RE = (alpha_R * (j_sot23) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x24 := -9.25000e+10
+j_stt24 := -3.06630e+09
+j_sot24 := -8.94337e+10
+J = vector(j_stt24, 0, j_sot24*scale2hm)
+tau_RE = (alpha_R * (j_sot24) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x25 := -9.25000e+10
+j_stt25 := -3.06630e+09
+j_sot25 := -8.94337e+10
+J = vector(j_stt25, 0, j_sot25*scale2hm)
+tau_RE = (alpha_R * (j_sot25) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x26 := -9.25000e+10
+j_stt26 := -3.06630e+09
+j_sot26 := -8.94337e+10
+J = vector(j_stt26, 0, j_sot26*scale2hm)
+tau_RE = (alpha_R * (j_sot26) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x27 := -9.25000e+10
+j_stt27 := -3.06630e+09
+j_sot27 := -8.94337e+10
+J = vector(j_stt27, 0, j_sot27*scale2hm)
+tau_RE = (alpha_R * (j_sot27) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x28 := -9.25000e+10
+j_stt28 := -3.06630e+09
+j_sot28 := -8.94337e+10
+J = vector(j_stt28, 0, j_sot28*scale2hm)
+tau_RE = (alpha_R * (j_sot28) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x29 := -9.25000e+10
+j_stt29 := -3.06630e+09
+j_sot29 := -8.94337e+10
+J = vector(j_stt29, 0, j_sot29*scale2hm)
+tau_RE = (alpha_R * (j_sot29) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x30 := -9.25000e+10
+j_stt30 := -3.06630e+09
+j_sot30 := -8.94337e+10
+J = vector(j_stt30, 0, j_sot30*scale2hm)
+tau_RE = (alpha_R * (j_sot30) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x31 := -8.28791e+10
+j_stt31 := -2.74737e+09
+j_sot31 := -8.01317e+10
+J = vector(j_stt31, 0, j_sot31*scale2hm)
+tau_RE = (alpha_R * (j_sot31) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x32 := -7.34951e+10
+j_stt32 := -2.43630e+09
+j_sot32 := -7.10588e+10
+J = vector(j_stt32, 0, j_sot32*scale2hm)
+tau_RE = (alpha_R * (j_sot32) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x33 := -6.59038e+10
+j_stt33 := -2.18466e+09
+j_sot33 := -6.37191e+10
+J = vector(j_stt33, 0, j_sot33*scale2hm)
+tau_RE = (alpha_R * (j_sot33) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x34 := -6.08591e+10
+j_stt34 := -2.01743e+09
+j_sot34 := -5.88417e+10
+J = vector(j_stt34, 0, j_sot34*scale2hm)
+tau_RE = (alpha_R * (j_sot34) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x35 := -5.66385e+10
+j_stt35 := -1.87752e+09
+j_sot35 := -5.47610e+10
+J = vector(j_stt35, 0, j_sot35*scale2hm)
+tau_RE = (alpha_R * (j_sot35) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x36 := -5.30063e+10
+j_stt36 := -1.75711e+09
+j_sot36 := -5.12492e+10
+J = vector(j_stt36, 0, j_sot36*scale2hm)
+tau_RE = (alpha_R * (j_sot36) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x37 := -5.28571e+10
+j_stt37 := -1.75217e+09
+j_sot37 := -5.11050e+10
+J = vector(j_stt37, 0, j_sot37*scale2hm)
+tau_RE = (alpha_R * (j_sot37) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x38 := -5.28571e+10
+j_stt38 := -1.75217e+09
+j_sot38 := -5.11050e+10
+J = vector(j_stt38, 0, j_sot38*scale2hm)
+tau_RE = (alpha_R * (j_sot38) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x39 := -5.28571e+10
+j_stt39 := -1.75217e+09
+j_sot39 := -5.11050e+10
+J = vector(j_stt39, 0, j_sot39*scale2hm)
+tau_RE = (alpha_R * (j_sot39) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x40 := -5.28571e+10
+j_stt40 := -1.75217e+09
+j_sot40 := -5.11050e+10
+J = vector(j_stt40, 0, j_sot40*scale2hm)
+tau_RE = (alpha_R * (j_sot40) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x41 := -5.28571e+10
+j_stt41 := -1.75217e+09
+j_sot41 := -5.11050e+10
+J = vector(j_stt41, 0, j_sot41*scale2hm)
+tau_RE = (alpha_R * (j_sot41) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x42 := -5.28571e+10
+j_stt42 := -1.75217e+09
+j_sot42 := -5.11050e+10
+J = vector(j_stt42, 0, j_sot42*scale2hm)
+tau_RE = (alpha_R * (j_sot42) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x43 := -5.28571e+10
+j_stt43 := -1.75217e+09
+j_sot43 := -5.11050e+10
+J = vector(j_stt43, 0, j_sot43*scale2hm)
+tau_RE = (alpha_R * (j_sot43) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x44 := -5.28571e+10
+j_stt44 := -1.75217e+09
+j_sot44 := -5.11050e+10
+J = vector(j_stt44, 0, j_sot44*scale2hm)
+tau_RE = (alpha_R * (j_sot44) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x45 := -5.28571e+10
+j_stt45 := -1.75217e+09
+j_sot45 := -5.11050e+10
+J = vector(j_stt45, 0, j_sot45*scale2hm)
+tau_RE = (alpha_R * (j_sot45) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x46 := -5.28571e+10
+j_stt46 := -1.75217e+09
+j_sot46 := -5.11050e+10
+J = vector(j_stt46, 0, j_sot46*scale2hm)
+tau_RE = (alpha_R * (j_sot46) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x47 := -5.28571e+10
+j_stt47 := -1.75217e+09
+j_sot47 := -5.11050e+10
+J = vector(j_stt47, 0, j_sot47*scale2hm)
+tau_RE = (alpha_R * (j_sot47) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x48 := -5.28571e+10
+j_stt48 := -1.75217e+09
+j_sot48 := -5.11050e+10
+J = vector(j_stt48, 0, j_sot48*scale2hm)
+tau_RE = (alpha_R * (j_sot48) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x49 := -5.28571e+10
+j_stt49 := -1.75217e+09
+j_sot49 := -5.11050e+10
+J = vector(j_stt49, 0, j_sot49*scale2hm)
+tau_RE = (alpha_R * (j_sot49) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x50 := -5.28571e+10
+j_stt50 := -1.75217e+09
+j_sot50 := -5.11050e+10
+J = vector(j_stt50, 0, j_sot50*scale2hm)
+tau_RE = (alpha_R * (j_sot50) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x51 := -5.28571e+10
+j_stt51 := -1.75217e+09
+j_sot51 := -5.11050e+10
+J = vector(j_stt51, 0, j_sot51*scale2hm)
+tau_RE = (alpha_R * (j_sot51) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x52 := -5.28571e+10
+j_stt52 := -1.75217e+09
+j_sot52 := -5.11050e+10
+J = vector(j_stt52, 0, j_sot52*scale2hm)
+tau_RE = (alpha_R * (j_sot52) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x53 := -5.28571e+10
+j_stt53 := -1.75217e+09
+j_sot53 := -5.11050e+10
+J = vector(j_stt53, 0, j_sot53*scale2hm)
+tau_RE = (alpha_R * (j_sot53) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x54 := -5.28571e+10
+j_stt54 := -1.75217e+09
+j_sot54 := -5.11050e+10
+J = vector(j_stt54, 0, j_sot54*scale2hm)
+tau_RE = (alpha_R * (j_sot54) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x55 := -5.28571e+10
+j_stt55 := -1.75217e+09
+j_sot55 := -5.11050e+10
+J = vector(j_stt55, 0, j_sot55*scale2hm)
+tau_RE = (alpha_R * (j_sot55) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x56 := -5.28571e+10
+j_stt56 := -1.75217e+09
+j_sot56 := -5.11050e+10
+J = vector(j_stt56, 0, j_sot56*scale2hm)
+tau_RE = (alpha_R * (j_sot56) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x57 := -5.28571e+10
+j_stt57 := -1.75217e+09
+j_sot57 := -5.11050e+10
+J = vector(j_stt57, 0, j_sot57*scale2hm)
+tau_RE = (alpha_R * (j_sot57) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x58 := -5.28571e+10
+j_stt58 := -1.75217e+09
+j_sot58 := -5.11050e+10
+J = vector(j_stt58, 0, j_sot58*scale2hm)
+tau_RE = (alpha_R * (j_sot58) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x59 := -5.28571e+10
+j_stt59 := -1.75217e+09
+j_sot59 := -5.11050e+10
+J = vector(j_stt59, 0, j_sot59*scale2hm)
+tau_RE = (alpha_R * (j_sot59) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x60 := -2.79641e+08
+j_stt60 := -9.26986e+06
+j_sot60 := -2.70371e+08
+J = vector(j_stt60, 0, j_sot60*scale2hm)
+tau_RE = (alpha_R * (j_sot60) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x61 := -0.00000e+00
+for i := 0; i <= maxRegion; i++ {
+	xLoc := (i * regionWidth) - (0.5 * sizeX) + fixed_w
+	midpoint := xLoc + regionWidth/2
+	defregion(i, rect(regionWidth, sizeY).transl(midpoint, 0, 0))
+	sMidpoint := midpoint / 1e-9
+	magVal := 499953.262473544 + (2.44264414189883 * sMidpoint) + (-1.69787922102728 * pow(sMidpoint, 2))
+	magVal = magVal + (-0.00139139644793811 * pow(sMidpoint, 3)) + (0.000522081037097506 * pow(sMidpoint, 4))
+	magVal = magVal + (2.07958198368938e-07 * pow(sMidpoint, 5)) + (-3.18943216748932e-07 * pow(sMidpoint, 6))
+	magVal = magVal + (-5.74769949136171e-12 * pow(sMidpoint, 7)) + (5.86471290676856e-11 * pow(sMidpoint, 8))
+	magVal = magVal + (-8.27481300391583e-16 * pow(sMidpoint, 9)) + (-4.57814229972819e-15 * pow(sMidpoint, 10))
+	magVal = magVal + (6.06336714445760e-20 * pow(sMidpoint, 11)) + (1.63131267036475e-19 * pow(sMidpoint, 12))
+	magVal = magVal + (-1.14650734679175e-24 * pow(sMidpoint, 13)) + (-2.17913696292306e-24 * pow(sMidpoint, 14))
+	Ku1.setRegion(i, magVal)
+}
+j_stt61 := -0.00000e+00
+j_sot61 := -0.00000e+00
+J = vector(j_stt61, 0, j_sot61*scale2hm)
+tau_RE = (alpha_R * (j_sot61) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x62 := -0.00000e+00
+j_stt62 := -0.00000e+00
+j_sot62 := -0.00000e+00
+J = vector(j_stt62, 0, j_sot62*scale2hm)
+tau_RE = (alpha_R * (j_sot62) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x63 := -0.00000e+00
+j_stt63 := -0.00000e+00
+j_sot63 := -0.00000e+00
+J = vector(j_stt63, 0, j_sot63*scale2hm)
+tau_RE = (alpha_R * (j_sot63) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x64 := -0.00000e+00
+j_stt64 := -0.00000e+00
+j_sot64 := -0.00000e+00
+J = vector(j_stt64, 0, j_sot64*scale2hm)
+tau_RE = (alpha_R * (j_sot64) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x65 := -0.00000e+00
+j_stt65 := -0.00000e+00
+j_sot65 := -0.00000e+00
+J = vector(j_stt65, 0, j_sot65*scale2hm)
+tau_RE = (alpha_R * (j_sot65) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x66 := -0.00000e+00
+j_stt66 := -0.00000e+00
+j_sot66 := -0.00000e+00
+J = vector(j_stt66, 0, j_sot66*scale2hm)
+tau_RE = (alpha_R * (j_sot66) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x67 := -0.00000e+00
+j_stt67 := -0.00000e+00
+j_sot67 := -0.00000e+00
+J = vector(j_stt67, 0, j_sot67*scale2hm)
+tau_RE = (alpha_R * (j_sot67) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x68 := -0.00000e+00
+j_stt68 := -0.00000e+00
+j_sot68 := -0.00000e+00
+J = vector(j_stt68, 0, j_sot68*scale2hm)
+tau_RE = (alpha_R * (j_sot68) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x69 := -0.00000e+00
+j_stt69 := -0.00000e+00
+j_sot69 := -0.00000e+00
+J = vector(j_stt69, 0, j_sot69*scale2hm)
+tau_RE = (alpha_R * (j_sot69) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x70 := -0.00000e+00
+j_stt70 := -0.00000e+00
+j_sot70 := -0.00000e+00
+J = vector(j_stt70, 0, j_sot70*scale2hm)
+tau_RE = (alpha_R * (j_sot70) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x71 := -0.00000e+00
+j_stt71 := -0.00000e+00
+j_sot71 := -0.00000e+00
+J = vector(j_stt71, 0, j_sot71*scale2hm)
+tau_RE = (alpha_R * (j_sot71) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x72 := -0.00000e+00
+j_stt72 := -0.00000e+00
+j_sot72 := -0.00000e+00
+J = vector(j_stt72, 0, j_sot72*scale2hm)
+tau_RE = (alpha_R * (j_sot72) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x73 := -0.00000e+00
+j_stt73 := -0.00000e+00
+j_sot73 := -0.00000e+00
+J = vector(j_stt73, 0, j_sot73*scale2hm)
+tau_RE = (alpha_R * (j_sot73) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x74 := -0.00000e+00
+j_stt74 := -0.00000e+00
+j_sot74 := -0.00000e+00
+J = vector(j_stt74, 0, j_sot74*scale2hm)
+tau_RE = (alpha_R * (j_sot74) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x75 := -0.00000e+00
+j_stt75 := -0.00000e+00
+j_sot75 := -0.00000e+00
+J = vector(j_stt75, 0, j_sot75*scale2hm)
+tau_RE = (alpha_R * (j_sot75) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x76 := -0.00000e+00
+j_stt76 := -0.00000e+00
+j_sot76 := -0.00000e+00
+J = vector(j_stt76, 0, j_sot76*scale2hm)
+tau_RE = (alpha_R * (j_sot76) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x77 := -0.00000e+00
+j_stt77 := -0.00000e+00
+j_sot77 := -0.00000e+00
+J = vector(j_stt77, 0, j_sot77*scale2hm)
+tau_RE = (alpha_R * (j_sot77) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x78 := -0.00000e+00
+j_stt78 := -0.00000e+00
+j_sot78 := -0.00000e+00
+J = vector(j_stt78, 0, j_sot78*scale2hm)
+tau_RE = (alpha_R * (j_sot78) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x79 := -0.00000e+00
+j_stt79 := -0.00000e+00
+j_sot79 := -0.00000e+00
+J = vector(j_stt79, 0, j_sot79*scale2hm)
+tau_RE = (alpha_R * (j_sot79) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x80 := -0.00000e+00
+j_stt80 := -0.00000e+00
+j_sot80 := -0.00000e+00
+J = vector(j_stt80, 0, j_sot80*scale2hm)
+tau_RE = (alpha_R * (j_sot80) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x81 := -0.00000e+00
+j_stt81 := -0.00000e+00
+j_sot81 := -0.00000e+00
+J = vector(j_stt81, 0, j_sot81*scale2hm)
+tau_RE = (alpha_R * (j_sot81) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x82 := -0.00000e+00
+j_stt82 := -0.00000e+00
+j_sot82 := -0.00000e+00
+J = vector(j_stt82, 0, j_sot82*scale2hm)
+tau_RE = (alpha_R * (j_sot82) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x83 := -0.00000e+00
+j_stt83 := -0.00000e+00
+j_sot83 := -0.00000e+00
+J = vector(j_stt83, 0, j_sot83*scale2hm)
+tau_RE = (alpha_R * (j_sot83) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x84 := -0.00000e+00
+j_stt84 := -0.00000e+00
+j_sot84 := -0.00000e+00
+J = vector(j_stt84, 0, j_sot84*scale2hm)
+tau_RE = (alpha_R * (j_sot84) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x85 := -0.00000e+00
+j_stt85 := -0.00000e+00
+j_sot85 := -0.00000e+00
+J = vector(j_stt85, 0, j_sot85*scale2hm)
+tau_RE = (alpha_R * (j_sot85) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x86 := -0.00000e+00
+j_stt86 := -0.00000e+00
+j_sot86 := -0.00000e+00
+J = vector(j_stt86, 0, j_sot86*scale2hm)
+tau_RE = (alpha_R * (j_sot86) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x87 := -0.00000e+00
+j_stt87 := -0.00000e+00
+j_sot87 := -0.00000e+00
+J = vector(j_stt87, 0, j_sot87*scale2hm)
+tau_RE = (alpha_R * (j_sot87) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x88 := -0.00000e+00
+j_stt88 := -0.00000e+00
+j_sot88 := -0.00000e+00
+J = vector(j_stt88, 0, j_sot88*scale2hm)
+tau_RE = (alpha_R * (j_sot88) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x89 := -0.00000e+00
+j_stt89 := -0.00000e+00
+j_sot89 := -0.00000e+00
+J = vector(j_stt89, 0, j_sot89*scale2hm)
+tau_RE = (alpha_R * (j_sot89) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x90 := -0.00000e+00
+j_stt90 := -0.00000e+00
+j_sot90 := -0.00000e+00
+J = vector(j_stt90, 0, j_sot90*scale2hm)
+tau_RE = (alpha_R * (j_sot90) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x91 := -0.00000e+00
+j_stt91 := -0.00000e+00
+j_sot91 := -0.00000e+00
+J = vector(j_stt91, 0, j_sot91*scale2hm)
+tau_RE = (alpha_R * (j_sot91) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x92 := -0.00000e+00
+j_stt92 := -0.00000e+00
+j_sot92 := -0.00000e+00
+J = vector(j_stt92, 0, j_sot92*scale2hm)
+tau_RE = (alpha_R * (j_sot92) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x93 := -0.00000e+00
+j_stt93 := -0.00000e+00
+j_sot93 := -0.00000e+00
+J = vector(j_stt93, 0, j_sot93*scale2hm)
+tau_RE = (alpha_R * (j_sot93) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x94 := -0.00000e+00
+j_stt94 := -0.00000e+00
+j_sot94 := -0.00000e+00
+J = vector(j_stt94, 0, j_sot94*scale2hm)
+tau_RE = (alpha_R * (j_sot94) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x95 := -0.00000e+00
+j_stt95 := -0.00000e+00
+j_sot95 := -0.00000e+00
+J = vector(j_stt95, 0, j_sot95*scale2hm)
+tau_RE = (alpha_R * (j_sot95) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x96 := -0.00000e+00
+j_stt96 := -0.00000e+00
+j_sot96 := -0.00000e+00
+J = vector(j_stt96, 0, j_sot96*scale2hm)
+tau_RE = (alpha_R * (j_sot96) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x97 := -0.00000e+00
+j_stt97 := -0.00000e+00
+j_sot97 := -0.00000e+00
+J = vector(j_stt97, 0, j_sot97*scale2hm)
+tau_RE = (alpha_R * (j_sot97) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x98 := -0.00000e+00
+j_stt98 := -0.00000e+00
+j_sot98 := -0.00000e+00
+J = vector(j_stt98, 0, j_sot98*scale2hm)
+tau_RE = (alpha_R * (j_sot98) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+j_x99 := -0.00000e+00
+j_stt99 := -0.00000e+00
+j_sot99 := -0.00000e+00
+J = vector(j_stt99, 0, j_sot99*scale2hm)
+tau_RE = (alpha_R * (j_sot99) * stt_P) / (u_B * Ms)
+B_ext = vector(0, tau_RE, 0)
+run(dt_step)
+run(rest)
+//********************************************************************//
+//Please cite the following references, relevant for your simulation. //
+//See bibtex file in output folder for justification.                 //
+//********************************************************************//
+//   * Leliaert et al., J. Appl. Phys. 115, 233903 (2014)
+//   * Mulkers et al., Phys. Rev. B 95, 144401 (2017).
+//   * Vansteenkiste et al., AIP Adv. 4, 107133 (2014).

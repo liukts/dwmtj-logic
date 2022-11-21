@@ -4,8 +4,8 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
-FS = 24
-LW = 3.5
+FS = 30
+LW = 4.5
 font = font_manager.FontProperties(family='Arial',style='normal',size=FS)
 matplotlib.rcParams['axes.linewidth'] = 4
 

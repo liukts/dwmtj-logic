@@ -5,8 +5,8 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
-FS = 25
-LW = 3.5
+FS = 30
+LW = 4.5
 sizeX = 255
 offsetDistance = 22.5
 oxideWidth = 15
@@ -33,15 +33,8 @@ magVal = magVal / 1e3
 sMidpoint = np.linspace(0, sizeX, sizeX)
 
 #Plot the Heatmap and the colorbar
-# fig, ax = plt.subplots(figsize=[10,10])
-# fig, ax = plt.subplots(1, 2, gridspec_kw={'width_ratios': [3, 1]})
-# fig.set_size_inches(18.5, 10.5)
-fig, ax = plt.subplots(sharex = True, squeeze = True, figsize=(16,5))
+fig, ax = plt.subplots(sharex = True, squeeze = True, figsize=(16,6))
 extent = [sMidpoint[0]-(sMidpoint[1]-sMidpoint[0])/2., sMidpoint[-1]+(sMidpoint[1]-sMidpoint[0])/2.,0,1]
-
-# xval = np.zeros(sizeX)
-# xval[]
-#Plot for the HeatMap
 im = ax.imshow(magVal[np.newaxis,:], 
                 cmap='plasma', 
                 aspect="auto", 
@@ -49,9 +42,28 @@ im = ax.imshow(magVal[np.newaxis,:],
 ax.set_yticks([])
 ax.set_xlim(extent[0], extent[1])
 ax.tick_params(labelsize=FS)
-ax.set_xticks([0, 30, 45, 210, 225, 255])
+xticks = np.linspace(0, sizeX, 5, endpoint=True)
+ax.set_xticks(xticks)
+ax.set_xticklabels(xticks.astype(int))
 ax.set_xlabel('Free Layer Location (nm)',fontsize=FS,fontname="Arial",labelpad=10)
 ax.set_title('Perpendicual Magnetic Anistropy during VCMA',fontsize=FS,fontname="Arial")
+
+# Add dashed lines vertically
+# fig.plot(15, 0, '--k', linewidth=LW)
+locations = [30, 45, 210, 225]
+for xc in locations:
+    plt.axvline(x=xc, color='orange', ls='--', lw=LW)
+
+#Add vertical line for electrodes
+plt.axvline(x=15, color='black', lw=LW)
+plt.axvline(x=(255-15), color='black', lw=LW)
+plt.axvline(x=(255/2-45/2), color='black', lw=LW)
+plt.axvline(x=(255/2+45/2), color='black', lw=LW)
+
+
+# ax1.plot(np.array([t_rest/1e-9,t_rest/1e-9])+t_pulse/1e-9,[0,sizeX],'--k',linewidth=LW)
+# ax1.plot(np.array([t_rest/1e-9,t_rest/1e-9])+(t_pulse+t_rest)/1e-9,[0,sizeX],'--k',linewidth=LW)
+# ax1.plot(np.array([t_rest/1e-9,t_rest/1e-9])+(2*t_pulse+t_rest)/1e-9,[0,sizeX],'--k',linewidth=LW)
 
 #Plot for the Colorbar
 ticks = np.linspace(magVal.min(), magVal.max(), 3, endpoint=True)

@@ -1,0 +1,562 @@
+//mumax 3.10 [linux_amd64 go1.14(gc) CUDA-9.0]
+//GPU info: NVIDIA A100-PCIE-40GB(40536MB), CUDA Driver 11.4, cc=8.0, using cc=70 PTX
+//(c) Arne Vansteenkiste, Dynamat LAB, Ghent University, Belgium
+//This is free software without any warranty. See license.txt
+//********************************************************************//
+//  If you use mumax in any work or publication,                      //
+//  we kindly ask you to cite the references in references.bib        //
+//********************************************************************//
+//output directory: DWswitch_12_1.out/
+notch_flag := 0
+unotch_only := 0
+edge_rough := 1
+preload_geom := 0
+SnapshotFormat = "png"
+Temp = 0
+ThermSeed(0)
+random_seed := 0
+sizeX := 2.55e-07
+sizeY := 1.50e-08
+sizeZ := 3e-9
+hm_sizeZ := sizeZ
+fm_cross_sec := sizeY * sizeZ
+hm_cross_sec := sizeY * hm_sizeZ
+notch_diam := 3.00e-09
+rough_diam := 1e-9
+notch_space_L := 50e-9
+w1 := sizeY
+w2 := sizeY
+angle := Asin(0.5 * (w2 - w1) / sizeX)
+notch_space := notch_space_L / cos(angle)
+Nx := 255
+Ny := 15
+magAn := 4.70e+05
+offsetDistance := 8.25e-08
+setgridsize(Nx, Ny, 1)
+setcellsize(sizeX/Nx, sizeY/Ny, sizeZ)
+if preload_geom == 1 {
+	setGeom(imageShape("STTPMA_rough.png"))
+} else {
+	if edge_rough == 1 {
+		maxrect := sizeX / rough_diam
+		xcenter := -0.5 * (sizeX - rough_diam)
+		xheight := (xcenter+(0.5*sizeX))*((w2-w1)/sizeX) + w1
+		baserect := rect(rough_diam, w1+(0.5*rough_diam*randNorm())).transl(xcenter, 0.5*rough_diam*randNorm(), 0)
+		for i := 1; i < maxrect; i++ {
+			randSeed(random_seed)
+			random_seed += 1
+			xcenter = xcenter + rough_diam
+			xheight = (xcenter+(0.5*sizeX))*((w2-w1)/sizeX) + w1
+			if mod(i, 5) == 0 {
+				baserect = baserect.add(rect(rough_diam, xheight+(0.5*rough_diam*randNorm())).transl(xcenter, 0.5*rough_diam*randNorm(), 0))
+			} else {
+				baserect = baserect.add(rect(rough_diam, xheight+(0.5*rough_diam)).transl(xcenter, 0.5*rough_diam, 0))
+			}
+		}
+		if notch_flag == 1 {
+			if unotch_only == 1 {
+				notch := circle(notch_diam)
+				lunotch := notch.transl(-(offsetDistance + 7.5e-9), 0.25*(w1+w2), 0).rotz(angle)
+				runotch := notch.transl((offsetDistance + 7.5e-9), 0.25*(w1+w2), 0).rotz(angle)
+				setGeom(baserect.sub(lunotch).sub(runotch))
+				saveAs(geom, "SOTPMA_rough_notch")
+			} else {
+				notch := circle(notch_diam)
+				lunotch := notch.transl(-(offsetDistance + 7.5e-9), 0.25*(w1+w2), 0).rotz(angle)
+				llnotch := notch.transl(-(offsetDistance + 7.5e-9), -0.25*(w1+w2), 0).rotz(-angle)
+				runotch := notch.transl((offsetDistance + 7.5e-9), 0.25*(w1+w2), 0).rotz(angle)
+				rlnotch := notch.transl((offsetDistance + 7.5e-9), -0.25*(w1+w2), 0).rotz(-angle)
+				setGeom(baserect.sub(lunotch).sub(llnotch).sub(runotch).sub(rlnotch))
+				saveAs(geom, "SOTPMA_rough_notch")
+			}
+		} else {
+			setGeom(baserect)
+			saveAs(geom, "SOTPMA_rough")
+		}
+	} else {
+		uhrect := rect(2*sizeX, sizeY).sub(rect(2*sizeX, 0.5*sizeY).transl(0, -0.25*sizeY, 0))
+		utilt := uhrect.transl(0, 0.25*(w1+w2), 0).rotz(angle)
+		lhrect := rect(2*sizeX, sizeY).sub(rect(2*sizeX, 0.5*sizeY).transl(0, 0.25*sizeY, 0))
+		ltilt := lhrect.transl(0, -0.25*(w1+w2), 0).rotz(-angle)
+		baserect := rect(sizeX, sizeY).sub(utilt).sub(ltilt)
+		if notch_flag == 1 {
+			if unotch_only == 1 {
+				notch := circle(notch_diam)
+				lunotch := notch.transl(-(offsetDistance + 7.5e-9), 0.25*(w1+w2), 0).rotz(angle)
+				runotch := notch.transl((offsetDistance + 7.5e-9), 0.25*(w1+w2), 0).rotz(angle)
+				setGeom(baserect.sub(lunotch).sub(runotch))
+				saveAs(geom, "SOTPMA_smooth_notch")
+			} else {
+				notch := circle(notch_diam)
+				lunotch := notch.transl(-(offsetDistance + 7.5e-9), 0.25*(w1+w2), 0).rotz(angle)
+				llnotch := notch.transl(-(offsetDistance + 7.5e-9), -0.25*(w1+w2), 0).rotz(-angle)
+				runotch := notch.transl((offsetDistance + 7.5e-9), 0.25*(w1+w2), 0).rotz(angle)
+				rlnotch := notch.transl((offsetDistance + 7.5e-9), -0.25*(w1+w2), 0).rotz(-angle)
+				setGeom(baserect.sub(lunotch).sub(llnotch).sub(runotch).sub(rlnotch))
+				saveAs(geom, "SOTPMA_smooth_notch")
+			}
+		} else {
+			setGeom(baserect)
+			saveAs(geom, "SOTPMA_smooth")
+		}
+	}
+}
+fixed_w := 5.00e-09
+grainSize := 1e-9
+randomSeed := 12
+maxRegion := 253
+regionWidth := (sizeX - 2*fixed_w) / maxRegion
+randK := 0.0125
+varK := 0.025
+oxideWidth := 1.50e-08
+for i := 0; i <= maxRegion; i++ {
+	xLoc := (i * regionWidth) - (0.5 * sizeX) + fixed_w
+	midpoint := xLoc + regionWidth/2
+	defregion(i, rect(regionWidth, sizeY).transl(midpoint, 0, 0))
+	sMidpoint := midpoint / 1e-9
+	magVal := 499906.524947088 + (4.88528828379472 * sMidpoint) + (-3.39575844205535 * pow(sMidpoint, 2))
+	magVal = magVal + (-0.00278279289587037 * pow(sMidpoint, 3)) + (0.00104416207419544 * pow(sMidpoint, 4))
+	magVal = magVal + (4.15916396734823e-07 * pow(sMidpoint, 5)) + (-6.37886433497943e-07 * pow(sMidpoint, 6))
+	magVal = magVal + (-1.14953989820526e-11 * pow(sMidpoint, 7)) + (1.17294258135377e-10 * pow(sMidpoint, 8))
+	magVal = magVal + (-1.65496260085558e-15 * pow(sMidpoint, 9)) + (-9.15628459945655e-15 * pow(sMidpoint, 10))
+	magVal = magVal + (1.21267342892931e-19 * pow(sMidpoint, 11)) + (3.26262534072950e-19 * pow(sMidpoint, 12))
+	magVal = magVal + (-2.29301469365942e-24 * pow(sMidpoint, 13)) + (-4.35827392584609e-24 * pow(sMidpoint, 14))
+	Ku1.setRegion(i, magVal)
+}
+defregion(254, rect(fixed_w, sizeY).transl(-((0.5*sizeX)-(0.5*fixed_w)), 0, 0))
+defregion(255, rect(fixed_w, sizeY).transl(((0.5*sizeX)-(0.5*fixed_w)), 0, 0))
+startpos := 2.10e-07
+m = TwoDomain(0, 0, 1, 1, 0, 0, 0, 0, -1).transl(-(0.5*sizeX)+startpos+fixed_w, 0, 0)
+m.setRegion(254, uniform(0, 0, 1))
+m.setRegion(255, uniform(0, 0, -1))
+frozenspins.setRegion(254, 254)
+frozenspins.setRegion(255, 255)
+EdgeSmooth = 8
+Ms := 8e5
+Msat = Ms
+Aex = 1.3e-11
+al := 0.05
+alpha = al
+AnisU = vector(0, 0, 1)
+dmi := -0.5e-3
+Dind = dmi
+Xi = 0.05
+stt_P := 0.7
+sot_P := 0.2
+scale2hm := sot_P / stt_P
+pol = stt_P
+u_B := 9.274e-24
+alpha_R := 2e-30
+lambda = 1
+epsilonprime = 0
+fixedlayer = vector(0, -1, 0)
+I_pulse := -8e-6
+I := I_pulse
+fm2hm := 0.5
+j_fm := 0.0
+j_hm := 0.0
+relax()
+mx_mid := cropY(m.Comp(2), floor(Ny/2), floor(Ny/2+1))
+tableAdd(mx_mid)
+tableAddVar(I, "I_x", "A")
+tableAdd(ext_dwxpos)
+tableautosave(10e-12)
+j_x := -1.85e+11
+j_stt := -6.14e+09
+j_sot := -1.79e+11
+j_sttAMTJ := -3.07e+09
+j_sotAMTJ := -8.95e+10
+tau_RE := (alpha_R * (j_sot) * stt_P) / (u_B * Ms)
+tau_REAMTJ := (alpha_R * (j_sotAMTJ) * stt_P) / (u_B * Ms)
+dt_step := 0.05e-09
+p_dur := 2.00e-09
+repeat := 3
+rest := 3.00e-09
+VCMA_dur := 1
+run(rest)
+ext_makegrains(grainSize, maxRegion, randomSeed)
+for i := 0; i <= maxRegion; i++ {
+	Ku1.setRegion(i, 5e5+((2*(rand()-0.5))*5e5*varK))
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+if (m.comp(2).average()*(sizeX+fixed_w*2)/2 + sizeX/2) <= sizex/2 {
+	J = vector(-j_sttAMTJ, 0, -j_sotAMTJ*scale2hm)
+	B_ext = vector(0, -tau_REAMTJ, 0)
+	run(dt_step)
+} else {
+	J = vector(-j_stt, 0, -j_sot*scale2hm)
+	B_ext = vector(0, -tau_RE, 0)
+	run(dt_step)
+}
+for i := 0; i <= maxRegion; i++ {
+	xLoc := (i * regionWidth) - (0.5 * sizeX) + fixed_w
+	midpoint := xLoc + regionWidth/2
+	defregion(i, rect(regionWidth, sizeY).transl(midpoint, 0, 0))
+	sMidpoint := midpoint / 1e-9
+	magVal := 499906.524947088 + (4.88528828379472 * sMidpoint) + (-3.39575844205535 * pow(sMidpoint, 2))
+	magVal = magVal + (-0.00278279289587037 * pow(sMidpoint, 3)) + (0.00104416207419544 * pow(sMidpoint, 4))
+	magVal = magVal + (4.15916396734823e-07 * pow(sMidpoint, 5)) + (-6.37886433497943e-07 * pow(sMidpoint, 6))
+	magVal = magVal + (-1.14953989820526e-11 * pow(sMidpoint, 7)) + (1.17294258135377e-10 * pow(sMidpoint, 8))
+	magVal = magVal + (-1.65496260085558e-15 * pow(sMidpoint, 9)) + (-9.15628459945655e-15 * pow(sMidpoint, 10))
+	magVal = magVal + (1.21267342892931e-19 * pow(sMidpoint, 11)) + (3.26262534072950e-19 * pow(sMidpoint, 12))
+	magVal = magVal + (-2.29301469365942e-24 * pow(sMidpoint, 13)) + (-4.35827392584609e-24 * pow(sMidpoint, 14))
+	Ku1.setRegion(i, magVal)
+}
+run(rest)
+//********************************************************************//
+//Please cite the following references, relevant for your simulation. //
+//See bibtex file in output folder for justification.                 //
+//********************************************************************//
+//   * Vansteenkiste et al., AIP Adv. 4, 107133 (2014).
+//   * Leliaert et al., J. Appl. Phys. 115, 233903 (2014)
+//   * Mulkers et al., Phys. Rev. B 95, 144401 (2017).

@@ -32,7 +32,7 @@ notch_dia = 3
 
 #Fanout of the Devices (1/2, 1, 2, 3, 4)
 fo0 = 1 #Fanout of device 0
-fo1 = 1/2 #Fanout of device 1
+fo1 = 1 #Fanout of device 1
 fo2 = 1 #Fanout of device 2
 
 # Calculation of the width of the MTJ
@@ -53,8 +53,8 @@ num_seeds = 1 # Number of seeds up to 50 to run for same test
 rest = 3e-9 # length of settling time with no current (time before pulse 1, between pulses, and after pulse 2)
 voltage_pulse = 40.0e-3 # Voltage Pulse
 VCMA_dur = 0 # Ratio of pinning effect during current pulse (Ratio needs to be less than 1 to work correctly)
-VCMA = 4.70 # minimum PMA value
-TMR = 0.90 # TMR of the MTJ
+VCMA = 4.75 # minimum PMA value
+TMR = 0.75 # TMR of the MTJ
 p_dur = 2e-9 # Duration of the voltage pulse
 simulate_deivce = 0 # (Basically what device to simulate) 1 device 1 2 device 2
 multiple_input = False # If t he device is going to be used as multiple input

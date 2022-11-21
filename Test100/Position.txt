@@ -1,0 +1,2 @@
+Number of DW that stayed in original position: 0
+Number of DW that propogated to other side of track: 25

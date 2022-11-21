@@ -45,7 +45,7 @@ if preload_geom == 1 {
 			random_seed += 1
 			xcenter = xcenter + rough_diam
 			xheight = (xcenter+(0.5*sizeX))*((w2-w1)/sizeX) + w1
-			if mod(i, 5) == 0 {
+			if mod(i, 4) == 0 {
 				baserect = baserect.add(rect(rough_diam, xheight+(0.5*rough_diam*randNorm())).transl(xcenter, 0.5*rough_diam*randNorm(), 0))
 			} else {
 				baserect = baserect.add(rect(rough_diam, xheight+(0.5*rough_diam)).transl(xcenter, 0.5*rough_diam, 0))
